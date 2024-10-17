@@ -21,8 +21,11 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
 
     // Employee routes
-    if (parsedUrl.pathname === "/employee" && req.method === "GET") {
-      employeeRoutes(req, res);
+    if (
+      parsedUrl.pathname === "/employee" &&
+      ["GET", "POST", "PUT", "DELETE"].includes(req.method)
+    ) {
+      employeeRoutes(req, res); // Handle GET, POST, PUT, DELETE for /employee
     } else if (
       parsedUrl.pathname.startsWith("/employee/vet") &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
