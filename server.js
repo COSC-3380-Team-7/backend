@@ -3,12 +3,16 @@ const url = require("url");
 const cors = require("cors");
 const {
   employeeRoutes,
+  vetRoutes,
+  maintenanceRoutes,
+  zookeeperRoutes,
   adminRoutes,
+  adminEmployeeRoutes,
   managerRoutes,
   animalRoutes,
   habitatRoutes,
   exhibitRoutes,
-} = require("./routes"); // Import routes
+} = require("./routes"); // Import all routes
 
 const PORT = 8081;
 
@@ -21,26 +25,23 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
 
     // Employee routes
-    if (
-      parsedUrl.pathname === "/employee" &&
-      ["GET", "POST", "PUT", "DELETE"].includes(req.method)
-    ) {
-      employeeRoutes(req, res); // Handle GET, POST, PUT, DELETE for /employee
+    if (parsedUrl.pathname === "/employee" && req.method === "GET") {
+      employeeRoutes(req, res); // Handle GET for /employee (only read)
     } else if (
       parsedUrl.pathname.startsWith("/employee/vet") &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
     ) {
-      employeeRoutes(req, res);
+      vetRoutes(req, res); // Handle CRUD for /employee/vet
     } else if (
       parsedUrl.pathname.startsWith("/employee/maintenance") &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
     ) {
-      employeeRoutes(req, res);
+      maintenanceRoutes(req, res); // Handle CRUD for /employee/maintenance
     } else if (
       parsedUrl.pathname.startsWith("/employee/zookeeper") &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
     ) {
-      employeeRoutes(req, res);
+      zookeeperRoutes(req, res); // Handle CRUD for /employee/zookeeper
     }
 
     // Admin routes
@@ -48,12 +49,12 @@ const server = http.createServer((req, res) => {
       parsedUrl.pathname === "/admin" &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
     ) {
-      adminRoutes(req, res);
+      adminRoutes(req, res); // Handle CRUD for /admin
     } else if (
       parsedUrl.pathname.startsWith("/admin/employee/") &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
     ) {
-      adminRoutes(req, res);
+      adminEmployeeRoutes(req, res); // Handle CRUD for /admin/employee/:id
     }
 
     // Manager routes
@@ -61,22 +62,22 @@ const server = http.createServer((req, res) => {
       parsedUrl.pathname === "/manager" &&
       ["POST", "GET", "PUT", "DELETE"].includes(req.method)
     ) {
-      managerRoutes(req, res);
+      managerRoutes(req, res); // Handle CRUD for /manager
     }
 
     // Animal routes
     else if (parsedUrl.pathname === "/animal" && req.method === "GET") {
-      animalRoutes(req, res);
+      animalRoutes(req, res); // Handle GET for /animal
     }
 
     // Habitat routes
     else if (parsedUrl.pathname === "/habitat" && req.method === "GET") {
-      habitatRoutes(req, res);
+      habitatRoutes(req, res); // Handle GET for /habitat
     }
 
     // Exhibit routes
     else if (parsedUrl.pathname === "/exhibit" && req.method === "GET") {
-      exhibitRoutes(req, res);
+      exhibitRoutes(req, res); // Handle GET for /exhibit
     }
 
     // If no matching route, return 404
