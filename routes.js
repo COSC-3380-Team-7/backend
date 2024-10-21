@@ -1,16 +1,18 @@
 const url = require("url");
 const {
   getEmployeesByRole,
+  getAdmins,
+  getManagers,
   addEmployee,
   updateEmployee,
   deleteEmployee,
-} = require("./controller");
+} = require("./controller"); // Import the controller functions
 
 // Employee routes handler
 const employeeRoutes = (req, res) => {
   if (req.method === "GET") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(getEmployeesByRole()));
+    res.end(JSON.stringify(getEmployeesByRole("all")));
   } else {
     res.writeHead(405, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Method Not Allowed" }));
@@ -77,19 +79,35 @@ const handleCRUD = (req, res, role) => {
 
 // Admin routes
 const adminRoutes = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ message: "Admin Route" }));
+  if (req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(getAdmins()));
+  } else {
+    res.writeHead(405, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
+  }
 };
 
+// Admin employee routes
 const adminEmployeeRoutes = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ message: "Admin Employee Route" }));
+  if (req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ message: "Admin Employee Route" }));
+  } else {
+    res.writeHead(405, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
+  }
 };
 
 // Manager routes
 const managerRoutes = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ message: "Manager Route" }));
+  if (req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(getManagers()));
+  } else {
+    res.writeHead(405, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
+  }
 };
 
 // Animal, habitat, and exhibit routes
