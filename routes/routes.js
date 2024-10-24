@@ -6,7 +6,7 @@ const {
   addEmployee,
   updateEmployee,
   deleteEmployee,
-} = require("./controller"); // Import the controller functions
+} = require("../controllers/controller"); // Import the controller functions
 
 // Employee routes handler
 const employeeRoutes = (req, res) => {
