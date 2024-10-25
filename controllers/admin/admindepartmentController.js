@@ -1,8 +1,14 @@
 const departments = [
-  { id: "INV001", name: "Animal Care", location: "Main Zoo" },
-  { id: "INV002", name: "Education", location: "Visitor Center" },
-  { id: "INV003", name: "Conservation", location: "Field Office" },
+  { id: "INV001", name: "Animal Care", location: "Main Zoo", employees: [] },
+  { id: "INV002", name: "Education", location: "Visitor Center", employees: [] },
+  { id: "INV003", name: "Conservation", location: "Field Office", employees: [] },
 ]; // This should be replaced with a database call
+
+const employees = [
+  { d_id: "INV001", id: "INV001", name: "John Smith", role: "Vet" },
+  { d_id: "INV002", id: "INV001", name: "Lee Anderson", role: "Maintenance" },
+  { d_id: "INV003", id: "INV001", name: "Sofia Carter", role: "Zookeeper" },
+];
 
 // Get all departments
 const getAllDepartments = (req, res) => {
@@ -34,14 +40,26 @@ const createDepartment = (req, res) => {
   });
 };
 
+const mapEmployeetoDepartment = () =>{
+  departments.forEach((department) => {
+    department.employees = employees.filter(emp => emp.d_id === department.id);
+  });
+};
+
+mapEmployeetoDepartment();
+
 // Get employees by department ID
 const getEmployeesByDepartmentId = (req, res) => {
   // Extract the department ID from the request URL
   const departmentId = req.url.split("/").pop(); // Get the last part of the URL
-  const employees =
-    departments.find((d) => d.id === departmentId)?.employees || [];
+  const department = departments.find((d) => d.id === departmentId);
+  if(!department){
+    res.writeHead(404, { "Content-Type": "text/plain" });
+
+    res.end(JSON.stringify("Department not found"));
+  }
   res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(employees));
+  res.end(JSON.stringify(department.employees));
 };
 
 // Get a specific employee by ID within a department
@@ -51,7 +69,11 @@ const getEmployeeById = (req, res) => {
   const employeeId = urlParts[urlParts.length - 1]; // Last part
 
   const department = departments.find((d) => d.id === departmentId);
-  const employee = department?.employees.find((e) => e.id === employeeId);
+  if(!department){
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end(JSON.stringify("Department not found"));
+  }
+  const employee = department.employees.find((e) => e.id === employeeId);
   if (!employee) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     return res.end("Employee not found");
@@ -67,7 +89,11 @@ const updateEmployee = (req, res) => {
   const employeeId = urlParts[urlParts.length - 1]; // Last part
 
   const department = departments.find((d) => d.id === departmentId);
-  let employee = department?.employees.find((e) => e.id === employeeId);
+  if(!department){
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end(JSON.stringify("Department not found"));
+  }
+  let employee = department.employees.find((e) => e.id === employeeId);
   if (!employee) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     return res.end("Employee not found");
