@@ -1,124 +1,141 @@
 const departments = [
-  { id: "INV001", name: "Animal Care", location: "Main Zoo", employees: [] },
-  { id: "INV002", name: "Education", location: "Visitor Center", employees: [] },
-  { id: "INV003", name: "Conservation", location: "Field Office", employees: [] },
-]; // This should be replaced with a database call
-
-const employees = [
-  { d_id: "INV001", id: "INV001", name: "John Smith", role: "Vet" },
-  { d_id: "INV002", id: "INV001", name: "Lee Anderson", role: "Maintenance" },
-  { d_id: "INV003", id: "INV001", name: "Sofia Carter", role: "Zookeeper" },
+  { id: "INV001", department_details: { name: "Animal Care", location: "Main Zoo", employees: [] } },
+  { id: "INV002", department_details: { name: "Education", location: "Visitor Center", employees: [] } },
+  { id: "INV003", department_details: { name: "Conservation", location: "Field Office", employees: [] } },
 ];
 
-// Get all departments
-const getAllDepartments = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(departments));
-};
+const employees = [
+  { d_id: "INV001", id: "E001", name: "John Smith", role: "Vet" },
+  { d_id: "INV002", id: "E002", name: "Lee Anderson", role: "Maintenance" },
+  { d_id: "INV003", id: "E003", name: "Sofia Carter", role: "Zookeeper" },
+];
 
-// Create a new department
-const createDepartment = (req, res) => {
-  // Handle the request body
-  let body = "";
-
-  // Collect data from the request body
-  req.on("data", (chunk) => {
-    body += chunk.toString(); // Convert Buffer to string
-  });
-
-  req.on("end", () => {
-    // Assume body is in JSON format
-    try {
-      const newDepartment = JSON.parse(body);
-      departments.push(newDepartment); // Add to database
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(newDepartment));
-    } catch (error) {
-      res.writeHead(400, { "Content-Type": "text/plain" });
-      res.end("Invalid JSON");
-    }
+// Helper function to read request body
+const getRequestBody = (req) => {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        resolve(data);
+      } catch (error) {
+        reject(new Error('Invalid JSON'));
+      }
+    });
+    req.on('error', (error) => reject(error));
   });
 };
 
-const mapEmployeetoDepartment = () =>{
+const mapEmployeetoDepartment = () => {
   departments.forEach((department) => {
-    department.employees = employees.filter(emp => emp.d_id === department.id);
+    department.department_details.employees = employees.filter(emp => emp.d_id === department.id);
   });
 };
 
+// Initialize employee mapping
 mapEmployeetoDepartment();
 
-// Get employees by department ID
+const getAllDepartments = (req, res) => {
+  try {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(departments));
+  } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal server error" }));
+  }
+};
+
+const createDepartment = async (req, res) => {
+  try {
+    const newDepartment = await getRequestBody(req);
+    departments.push(newDepartment);
+    res.writeHead(201, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(newDepartment));
+  } catch (error) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: error.message }));
+  }
+};
+
 const getEmployeesByDepartmentId = (req, res) => {
-  // Extract the department ID from the request URL
-  const departmentId = req.url.split("/").pop(); // Get the last part of the URL
-  const department = departments.find((d) => d.id === departmentId);
-  if(!department){
-    res.writeHead(404, { "Content-Type": "text/plain" });
+  try {
+    const departmentId = req.url.split("/").pop();
+    const department = departments.find((d) => d.id === departmentId);
 
-    res.end(JSON.stringify("Department not found"));
-  }
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(department.employees));
-};
-
-// Get a specific employee by ID within a department
-const getEmployeeById = (req, res) => {
-  const urlParts = req.url.split("/");
-  const departmentId = urlParts[urlParts.length - 2]; // Second last part
-  const employeeId = urlParts[urlParts.length - 1]; // Last part
-
-  const department = departments.find((d) => d.id === departmentId);
-  if(!department){
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end(JSON.stringify("Department not found"));
-  }
-  const employee = department.employees.find((e) => e.id === employeeId);
-  if (!employee) {
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    return res.end("Employee not found");
-  }
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(employee));
-};
-
-// Update employee info
-const updateEmployee = (req, res) => {
-  const urlParts = req.url.split("/");
-  const departmentId = urlParts[urlParts.length - 2]; // Second last part
-  const employeeId = urlParts[urlParts.length - 1]; // Last part
-
-  const department = departments.find((d) => d.id === departmentId);
-  if(!department){
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end(JSON.stringify("Department not found"));
-  }
-  let employee = department.employees.find((e) => e.id === employeeId);
-  if (!employee) {
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    return res.end("Employee not found");
-  }
-
-  // Handle the request body
-  let body = "";
-
-  // Collect data from the request body
-  req.on("data", (chunk) => {
-    body += chunk.toString(); // Convert Buffer to string
-  });
-
-  req.on("end", () => {
-    // Assume body is in JSON format
-    try {
-      const updatedData = JSON.parse(body);
-      employee = { ...employee, ...updatedData }; // Merge with updated data
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(employee));
-    } catch (error) {
-      res.writeHead(400, { "Content-Type": "text/plain" });
-      res.end("Invalid JSON");
+    if (!department) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Department not found" }));
     }
-  });
+
+    // Access employees within department details
+    const employeesList = department.department_details.employees || [];
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(employeesList));
+  } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal server error" }));
+  }
+};
+
+const getEmployeeById = (req, res) => {
+  try {
+    const urlParts = req.url.split("/");
+    const departmentId = urlParts[urlParts.length - 3]; // Second-to-last parameter
+    const employeeId = urlParts[urlParts.length - 1];   // Last parameter
+
+    const department = departments.find((d) => d.id === departmentId);
+    if (!department) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Department not found" }));
+    }
+
+    const employee = department.department_details.employees.find((e) => e.id === employeeId);
+    if (!employee) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Employee not found" }));
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(employee));
+  } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal server error" }));
+  }
+};
+
+const updateEmployee = async (req, res) => {
+  try {
+    const urlParts = req.url.split("/");
+    const departmentId = urlParts[urlParts.length - 3]; // account for '/edit' at the end
+    const employeeId = urlParts[urlParts.length - 2];
+
+    const department = departments.find((d) => d.id === departmentId);
+    if (!department) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Department not found" }));
+    }
+
+    const employeeIndex = department.employees.findIndex((e) => e.id === employeeId);
+    if (employeeIndex === -1) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ error: "Employee not found" }));
+    }
+
+    const updatedData = await getRequestBody(req);
+    department.employees[employeeIndex] = { 
+      ...department.employees[employeeIndex], 
+      ...updatedData 
+    };
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(department.employees[employeeIndex]));
+  } catch (error) {
+    res.writeHead(error.message === 'Invalid JSON' ? 400 : 500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: error.message || "Internal server error" }));
+  }
 };
 
 module.exports = {
