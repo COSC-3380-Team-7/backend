@@ -2,6 +2,7 @@ const http = require("http");
 const url = require("url");
 const exhibitController = require("../controllers/admin/adminexhibitController");
 const departmentController = require("../controllers/admin/admindepartmentController");
+const ticketController = require("../controllers/admin/adminticketController");
 
 const adminRoutes = async (req, res) => {
   try {
@@ -17,56 +18,99 @@ const adminRoutes = async (req, res) => {
     // Exhibit Routes
     if (parsedUrl.pathname.startsWith("/admin/exhibit")) {
       // Order routes from most specific to least specific
-      if (method === "PUT" && parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)\/edit/)) {
+      if (
+        method === "PUT" &&
+        parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)\/edit/)
+      ) {
         await exhibitController.updateExhibit(req, res);
-      } 
-      else if (method === "GET" && parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)/)) {
+      } else if (
+        method === "GET" &&
+        parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)/)
+      ) {
         await exhibitController.getExhibitById(req, res);
-      }
-      else if (method === "POST" && parsedUrl.pathname === "/admin/exhibit/create") {
+      } else if (
+        method === "POST" &&
+        parsedUrl.pathname === "/admin/exhibit/create"
+      ) {
         exhibitController.createExhibit(req, res);
-      }
-      else if (method === "GET" && parsedUrl.pathname === "/admin/exhibit") {
-       exhibitController.getAllExhibits(req, res);
-      }
-      else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Route not found' }));
+      } else if (method === "GET" && parsedUrl.pathname === "/admin/exhibit") {
+        exhibitController.getAllExhibits(req, res);
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Route not found" }));
       }
     }
-    
+
     // Department Routes
     else if (parsedUrl.pathname.startsWith("/admin/department")) {
       // Order routes from most specific to least specific
-      if (method === "PUT" && parsedUrl.pathname.match(/\/admin\/department\/([^/]+)\/employee\/([^/]+)\/edit/)) {
+      if (
+        method === "PUT" &&
+        parsedUrl.pathname.match(
+          /\/admin\/department\/([^/]+)\/employee\/([^/]+)\/edit/
+        )
+      ) {
         await departmentController.updateEmployee(req, res);
-      }
-      else if (method === "GET" && parsedUrl.pathname.match(/\/admin\/department\/([^/]+)\/employee\/([^/]+)/)) {
+      } else if (
+        method === "GET" &&
+        parsedUrl.pathname.match(
+          /\/admin\/department\/([^/]+)\/employee\/([^/]+)/
+        )
+      ) {
         await departmentController.getEmployeeById(req, res);
-      }
-      else if (method === "GET" && parsedUrl.pathname.match(/\/admin\/department\/([^/]+)/)) {
+      } else if (
+        method === "GET" &&
+        parsedUrl.pathname.match(/\/admin\/department\/([^/]+)/)
+      ) {
         await departmentController.getEmployeesByDepartmentId(req, res);
-      }
-      else if (method === "POST" && parsedUrl.pathname === "/admin/department/create") {
+      } else if (
+        method === "POST" &&
+        parsedUrl.pathname === "/admin/department/create"
+      ) {
         await departmentController.createDepartment(req, res);
-      }
-      else if (method === "GET" && parsedUrl.pathname === "/admin/department") {
-       departmentController.getAllDepartments(req, res);
-      }
-      else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Route not found' }));
+      } else if (
+        method === "GET" &&
+        parsedUrl.pathname === "/admin/department"
+      ) {
+        departmentController.getAllDepartments(req, res);
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Route not found" }));
       }
     }
-    
+
+    // Ticket Routes
+    else if (parsedUrl.pathname.startsWith("/admin/ticket")) {
+      if (method === "GET" && parsedUrl.pathname === "/admin/ticket") {
+        // GET /admin/ticket - Retrieve all tickets
+        ticketController.getAllTickets(req, res);
+      } else if (
+        method === "POST" &&
+        parsedUrl.pathname === "/admin/ticket/create"
+      ) {
+        // POST /admin/ticket/create - Create a new ticket
+        ticketController.createTicket(req, res);
+      } else if (
+        method === "PUT" &&
+        parsedUrl.pathname.match(/\/admin\/ticket\/(\d+)\/edit/)
+      ) {
+        // PUT /admin/ticket/:id/edit - Update a specific ticket by ID
+        ticketController.updateTicket(req, res);
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Route not found" }));
+      }
+    }
+
+    // If route is not matched, return 404 error
     else {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Route not found' }));
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Route not found" }));
     }
   } catch (error) {
-    console.error('Error in admin routes:', error);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Internal server error' }));
+    console.error("Error in admin routes:", error);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal server error" }));
   }
 };
 
