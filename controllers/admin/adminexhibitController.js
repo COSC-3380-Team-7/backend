@@ -44,7 +44,7 @@ const createExhibit = (req, res) => {
   res.end(JSON.stringify(newExhibit));
 };
 
-// Get a specific exhibit by ID   /admin/exhibit/id
+// Get a specific exhibit by ID   /admin/exhibit/exhibitid
 const getExhibitById = (req, res) => {
   // Extract the exhibit ID from the request URL
   const exhibitId = req.url.split("/").pop(); // Get the last part of the URL
@@ -68,7 +68,7 @@ const getExhibitById = (req, res) => {
   res.end(JSON.stringify(exhibitData));
 };
 
-//Edits a specific exhibit information   /admin/exhibit/id/edit
+//Edits a specific exhibit information   /admin/exhibit/exhibitid/edit
 const updateExhibit = (req, res) => {
   // Extract the exhibit ID from the URL
   const urlParts = req.url.split("/");
