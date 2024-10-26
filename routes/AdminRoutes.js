@@ -3,6 +3,7 @@ const url = require("url");
 const exhibitController = require("../controllers/admin/adminexhibitController");
 const departmentController = require("../controllers/admin/admindepartmentController");
 const ticketController = require("../controllers/admin/adminticketController");
+const eventController = require("../controllers/admin/admineventController");
 
 const adminRoutes = async (req, res) => {
   try {
@@ -17,7 +18,6 @@ const adminRoutes = async (req, res) => {
 
     // Exhibit Routes
     if (parsedUrl.pathname.startsWith("/admin/exhibit")) {
-      // Order routes from most specific to least specific
       if (
         method === "PUT" &&
         parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)\/edit/)
@@ -43,7 +43,6 @@ const adminRoutes = async (req, res) => {
 
     // Department Routes
     else if (parsedUrl.pathname.startsWith("/admin/department")) {
-      // Order routes from most specific to least specific
       if (
         method === "PUT" &&
         parsedUrl.pathname.match(
@@ -82,20 +81,37 @@ const adminRoutes = async (req, res) => {
     // Ticket Routes
     else if (parsedUrl.pathname.startsWith("/admin/ticket")) {
       if (method === "GET" && parsedUrl.pathname === "/admin/ticket") {
-        // GET /admin/ticket - Retrieve all tickets
         ticketController.getAllTickets(req, res);
       } else if (
         method === "POST" &&
         parsedUrl.pathname === "/admin/ticket/create"
       ) {
-        // POST /admin/ticket/create - Create a new ticket
         ticketController.createTicket(req, res);
       } else if (
         method === "PUT" &&
         parsedUrl.pathname.match(/\/admin\/ticket\/(\d+)\/edit/)
       ) {
-        // PUT /admin/ticket/:id/edit - Update a specific ticket by ID
         ticketController.updateTicket(req, res);
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Route not found" }));
+      }
+    }
+
+    // Event Routes
+    else if (parsedUrl.pathname.startsWith("/admin/event")) {
+      if (method === "GET" && parsedUrl.pathname === "/admin/event") {
+        eventController.getAllEvents(req, res);
+      } else if (
+        method === "POST" &&
+        parsedUrl.pathname === "/admin/event/create"
+      ) {
+        eventController.createEvent(req, res);
+      } else if (
+        method === "PUT" &&
+        parsedUrl.pathname.match(/\/admin\/event\/([^/]+)\/edit/)
+      ) {
+        eventController.updateEvent(req, res);
       } else {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Route not found" }));
