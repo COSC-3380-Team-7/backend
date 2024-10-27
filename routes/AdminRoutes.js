@@ -16,26 +16,63 @@ const adminRoutes = async (req, res) => {
       return match ? match[1] : null;
     };
 
-    // Exhibit Routes
     if (parsedUrl.pathname.startsWith("/admin/exhibit")) {
+      // Habitat Routes within Exhibit (More specific first)
+
+      // Route for updating a habitat within a specific exhibit
       if (
+        method === "GET" &&
+        parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)\/habitat\/([^/]+)/)
+      ) {
+        exhibitController.getHabitatById(req, res);
+      }
+      // Route for updating a specific habitat by ID
+      else if (
+        method === "PUT" &&
+        parsedUrl.pathname.match(
+          /\/admin\/exhibit\/([^/]+)\/habitat\/([^/]+)\/edit/
+        )
+      ) {
+        exhibitController.updateHabitat(req, res);
+      }
+      // Route for creating a habitat within a specific exhibit
+      else if (
+        method === "POST" &&
+        parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)\/habitat\/create/)
+      ) {
+        exhibitController.createHabitat(req, res);
+      }
+
+      // Exhibit Routes (General routes for exhibits)
+
+      // Route for updating an exhibit
+      else if (
         method === "PUT" &&
         parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)\/edit/)
       ) {
         await exhibitController.updateExhibit(req, res);
-      } else if (
+      }
+      // Route for getting an exhibit by ID
+      else if (
         method === "GET" &&
         parsedUrl.pathname.match(/\/admin\/exhibit\/([^/]+)/)
       ) {
         await exhibitController.getExhibitById(req, res);
-      } else if (
+      }
+      // Route for creating an exhibit
+      else if (
         method === "POST" &&
         parsedUrl.pathname === "/admin/exhibit/create"
       ) {
         exhibitController.createExhibit(req, res);
-      } else if (method === "GET" && parsedUrl.pathname === "/admin/exhibit") {
+      }
+      // Route for getting all exhibits
+      else if (method === "GET" && parsedUrl.pathname === "/admin/exhibit") {
         exhibitController.getAllExhibits(req, res);
-      } else {
+      }
+
+      // Route not found
+      else {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Route not found" }));
       }
