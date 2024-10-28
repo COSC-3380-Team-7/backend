@@ -15,8 +15,14 @@ const getSingleExhibit = (req, res, exhibit_id) => {
 	res.writeHead(200, { "Content-Type": "application/json" });
 	res.end(
 		JSON.stringify({
-			message: `GET /admin/exhibit/${exhibit_id}`,
 			exhibit_id_params: exhibit_id,
+			data: {
+				exhibit_id: 1,
+				name: "Exhibit 1",
+				description: "Description of Exhibit 1",
+				location: "Location of Exhibit 1",
+				department_id: 1,
+			},
 		})
 	);
 };
@@ -70,7 +76,6 @@ const createExhibit = (req, res) => {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(
 			JSON.stringify({
-				message: "POST /admin/exhibit",
 				data: {
 					exhibit_id: 1234567,
 					name,

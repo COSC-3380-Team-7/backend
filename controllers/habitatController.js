@@ -14,8 +14,13 @@ const getSingleHabitat = (req, res, habitat_id) => {
 	res.writeHead(200, { "Content-Type": "application/json" });
 	res.end(
 		JSON.stringify({
-			message: `GET /admin/habitat/${habitat_id}`,
 			habitat_id_params: habitat_id,
+			data: {
+				habitat_id: 1,
+				name: "Habitat 1",
+				description: "Description of Habitat 1",
+				exhibit_id: 1,
+			},
 		})
 	);
 };
@@ -49,7 +54,6 @@ const updateHabitat = (req, res, habitat_id) => {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(
 			JSON.stringify({
-				message: `PUT /admin/habitat/:${habitat_id}`,
 				data: { name, description, exhibit_id },
 			})
 		);
@@ -68,7 +72,6 @@ const createHabitat = (req, res) => {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(
 			JSON.stringify({
-				message: "POST /admin/habitat",
 				data: { habitat_id: 1234567, name, description, exhibit_id },
 			})
 		);

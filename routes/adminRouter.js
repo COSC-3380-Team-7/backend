@@ -1,8 +1,8 @@
 // const controller = require("./controller");
 const URL = require("url"); // Import the URL class
-const exhibitController = require("../controllers/admin/exhibitController");
-const habitatController = require("../controllers/admin/habitatController");
-const animalController = require("../controllers/admin/animalController");
+const exhibitController = require("../controllers/exhibitController");
+const habitatController = require("../controllers/habitatController");
+const animalController = require("../controllers/animalController");
 
 function router(req, res) {
 	const url = req.url;

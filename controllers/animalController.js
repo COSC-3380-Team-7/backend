@@ -29,7 +29,6 @@ const getSingleAnimal = (req, res, animal_id) => {
 	res.writeHead(200, { "Content-Type": "application/json" });
 	res.end(
 		JSON.stringify({
-			message: `GET /admin/animal/${animal_id}`,
 			animal_id_params: animal_id,
 			data: {
 				animal_id: 1,
@@ -118,7 +117,6 @@ const updateAnimal = (req, res, animal_id) => {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(
 			JSON.stringify({
-				message: `PUT /admin/animal/:${animal_id}`,
 				data: {
 					animal_id: 1234567,
 					name,
@@ -174,7 +172,6 @@ const createAnimal = (req, res) => {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(
 			JSON.stringify({
-				message: "POST /admin/animal",
 				data: {
 					animal_id: 1234567,
 					name,
