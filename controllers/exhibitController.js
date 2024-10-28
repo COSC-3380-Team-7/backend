@@ -57,7 +57,6 @@ const updateExhibit = (req, res, exhibit_id) => {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(
 			JSON.stringify({
-				message: `PUT /admin/exhibit/:${exhibit_id}`,
 				data: { exhibit_id, name, description, location, department_id },
 			})
 		);
