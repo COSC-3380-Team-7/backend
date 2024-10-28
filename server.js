@@ -7,7 +7,7 @@ const managerRoutes = require("./routes/managerRouter");
 const adminRoutes = require("./routes/adminRouter");
 const memberRoutes = require("./routes/memberRouter");
 const publicRoutes = require("./routes/publicRouter");
-const { dbConnection } = require("./db");
+// const { dbConnection } = require("./db");
 
 const PORT = process.env.PORT || 8081;
 
