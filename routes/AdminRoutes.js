@@ -4,6 +4,7 @@ const exhibitController = require("../controllers/admin/adminexhibitController")
 const departmentController = require("../controllers/admin/admindepartmentController");
 const ticketController = require("../controllers/admin/adminticketController");
 const eventController = require("../controllers/admin/admineventController");
+const veterinaryController = require("../controllers/admin/adminvetController");
 
 const adminRoutes = async (req, res) => {
   try {
@@ -154,6 +155,27 @@ const adminRoutes = async (req, res) => {
         res.end(JSON.stringify({ error: "Route not found" }));
       }
     }
+    else if (parsedUrl.pathname.startsWith("/admin/veterinary")) {
+      if (method === "GET" && parsedUrl.pathname === "/admin/veterinary") {
+       veterinaryController.getAllReports(req, res);
+      } 
+      else if (method === "POST" && parsedUrl.pathname === "/admin/veterinary/create") {
+        await veterinaryController.createReport(req, res);
+      }
+      else if (method === "GET" && parsedUrl.pathname.match(/\/admin\/veterinary\/([^/]+)/)) {
+        await veterinaryController.getReportById(req, res);
+      }
+      else if (method === "PUT" && parsedUrl.pathname.match(/\/admin\/veterinary\/([^/]+)\/edit/)) {
+        await veterinaryController.updateReport(req, res);
+      }
+      else if (method === "DELETE" && parsedUrl.pathname.match(/\/admin\/veterinary\/([^/]+)\/delete/)) {
+        await veterinaryController.deleteReport(req, res);
+      }
+      else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Route not found" }));
+      }
+    }
 
     // If route is not matched, return 404 error
     else {
@@ -168,3 +190,4 @@ const adminRoutes = async (req, res) => {
 };
 
 module.exports = adminRoutes;
+
