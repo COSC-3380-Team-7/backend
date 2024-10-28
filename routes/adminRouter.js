@@ -5,6 +5,7 @@ const habitatController = require("../controllers/habitatController");
 const animalController = require("../controllers/animalController");
 const maintenanceController = require("../controllers/maintenanceController");
 const eventController = require("../controllers/eventController");
+const ticketController = require("../controllers/ticketController");
 
 function router(req, res) {
   const url = req.url;
@@ -104,6 +105,27 @@ function router(req, res) {
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing event id." }));
+    }
+  } else if (url.startsWith("/admin/ticket") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const ticket_id = parts[3].slice(1); // Extract ticket_id from the URL
+      ticketController.getSingleTicket(req, res, ticket_id);
+    } else {
+      ticketController.getAllTickets(req, res);
+    }
+  } else if (url.startsWith("/admin/ticket") && method === "POST") {
+    ticketController.createTicket(req, res);
+  } else if (url.startsWith("/admin/ticket") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const ticket_id = parts[3]; // Extract ticket_id from the URL
+      ticketController.updateTicket(req, res, ticket_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing ticket id." }));
     }
   }
 }
