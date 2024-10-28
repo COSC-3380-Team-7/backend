@@ -4,6 +4,7 @@ const exhibitController = require("../controllers/exhibitController");
 const habitatController = require("../controllers/habitatController");
 const animalController = require("../controllers/animalController");
 const maintenanceController = require("../controllers/maintenanceController");
+const eventController = require("../controllers/eventController");
 
 function router(req, res) {
   const url = req.url;
@@ -90,6 +91,19 @@ function router(req, res) {
       );
     } else {
       maintenanceController.getAllMaintenanceReports(req, res);
+    }
+  } else if (url.startsWith("/admin/event") && method === "GET") {
+    eventController.getAllEvents(req, res);
+  } else if (url.startsWith("/admin/event/create") && method === "POST") {
+    eventController.createEvent(req, res);
+  } else if (url.startsWith("/admin/event") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+    if (parts.length >= 4) {
+      const event_id = parts[3].slice(1);
+      eventController.updateEvent(req, res, event_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing event id." }));
     }
   }
 }
