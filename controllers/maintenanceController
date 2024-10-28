@@ -1,0 +1,151 @@
+// const pool = require("./db.js");
+// const queries = require("./queries.js");
+
+const jwt = require("jsonwebtoken");
+
+/**
+ * Maintenance Report Schema
+ * maintenance_report_id: int
+ * title: string
+ * details: string
+ * maintenance_cause: string
+ * employee_id: int
+ * habitat_id: int
+ * working_status: string
+ * created_at: date
+ * updated_at: date
+ * completed_at: date
+ **/
+
+// Get a single maintenance report by ID
+const getSingleMaintenanceReport = (req, res, maintenance_report_id) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(
+    JSON.stringify({
+      maintenance_report_id_params: maintenance_report_id,
+      data: {
+        maintenance_report_id: 12345678,
+        title: "Damage to Tiger Habitat",
+        maintenance_cause: "Tiger damaged the habitat",
+        details: "Tiger broke the glass",
+        working_status: "Pending",
+        habitat_id: 56789,
+        employee_id: 456789,
+        created_at: "2024-10-22",
+        updated_at: "2024-10-22",
+        completed_at: null,
+      },
+    })
+  );
+};
+
+// Get all maintenance reports
+const getAllMaintenanceReports = (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(
+    JSON.stringify({
+      data: [
+        {
+          maintenance_report_id: 12345678,
+          title: "Damage to Tiger Habitat",
+          maintenance_cause: "Tiger damaged the habitat",
+          details: "Tiger broke the glass",
+          working_status: "Pending",
+          habitat_id: 56789,
+          employee_id: 456789,
+          created_at: "2024-10-22",
+          updated_at: "2024-10-22",
+          completed_at: null,
+        },
+      ],
+    })
+  );
+};
+
+// Update a maintenance report by ID
+const updateMaintenanceReport = (req, res, maintenance_report_id) => {
+  console.log(maintenance_report_id);
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
+
+  req.on("end", () => {
+    const {
+      title,
+      maintenance_cause,
+      details,
+      working_status,
+      habitat_id,
+      employee_id,
+      created_at,
+      updated_at,
+      completed_at,
+    } = JSON.parse(body);
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: {
+          maintenance_report_id,
+          title,
+          maintenance_cause,
+          details,
+          working_status,
+          habitat_id,
+          employee_id,
+          created_at,
+          updated_at,
+          completed_at,
+        },
+      })
+    );
+  });
+};
+
+// Create a new maintenance report
+const createMaintenanceReport = (req, res) => {
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
+
+  req.on("end", () => {
+    const {
+      title,
+      maintenance_cause,
+      details,
+      working_status,
+      habitat_id,
+      employee_id,
+      created_at,
+      updated_at,
+      completed_at,
+    } = JSON.parse(body);
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: {
+          maintenance_report_id: 1234567,
+          title,
+          maintenance_cause,
+          details,
+          working_status,
+          habitat_id,
+          employee_id,
+          created_at,
+          updated_at,
+          completed_at,
+        },
+      })
+    );
+  });
+};
+
+module.exports = {
+  getSingleMaintenanceReport,
+  getAllMaintenanceReports,
+  updateMaintenanceReport,
+  createMaintenanceReport,
+};
