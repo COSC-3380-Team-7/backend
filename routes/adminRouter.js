@@ -305,9 +305,6 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL: missing occupation id." }));
 		}
-	} else {
-		res.writeHead(404, { "Content-Type": "application/json" });
-		res.end(JSON.stringify({ error: "Route not found" }));
 	}
 }
 
