@@ -11,6 +11,7 @@ const departmentController = require("../controllers/departmentController");
 const employeeController = require("../controllers/employeeController");
 const giftShopController = require("../controllers/giftShopController");
 const merchandiseController = require("../controllers/merchandiseController");
+const occupationController = require("../controllers/occupationController");
 
 function router(req, res) {
   const url = req.url;
@@ -272,6 +273,23 @@ function router(req, res) {
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing merchandise id." }));
+    }
+  }
+  if (url.startsWith("/admin/occupations") && method === "GET") {
+    // For getting all occupations
+    occupationController.getAllOccupations(req, res);
+  } else if (url.startsWith("/admin/occupations") && method === "POST") {
+    // For creating a new occupation
+    occupationController.createOccupation(req, res);
+  } else if (url.startsWith("/admin/occupations") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const occupation_id = parts[3]; // Extract occupation_id from the URL
+      occupationController.updateOccupation(req, res, occupation_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL: missing occupation id." }));
     }
   }
 }
