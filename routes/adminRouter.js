@@ -6,6 +6,7 @@ const animalController = require("../controllers/animalController");
 const maintenanceController = require("../controllers/maintenanceController");
 const eventController = require("../controllers/eventController");
 const ticketController = require("../controllers/ticketController");
+const vetReportsController = require("../controllers/vetReportsController");
 
 function router(req, res) {
   const url = req.url;
@@ -126,6 +127,28 @@ function router(req, res) {
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing ticket id." }));
+    }
+  }
+  if (url.startsWith("/admin/vet_report") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length === 4) {
+      const vet_report_id = parts[3]; // Extract vet_report_id from the URL
+      vetReportsController.getSingleVetReport(req, res, vet_report_id);
+    } else {
+      vetReportsController.getAllHabitats(req, res);
+    }
+  } else if (url.startsWith("/admin/vet_report") && method === "POST") {
+    vetReportsController.createHabitat(req, res);
+  } else if (url.startsWith("/admin/vet_report") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const vet_report_id = parts[3]; // Extract vet_report_id from the URL
+      vetReportsController.updateHabitat(req, res, vet_report_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing vet_report_id." }));
     }
   }
 }
