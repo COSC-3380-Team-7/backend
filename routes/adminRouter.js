@@ -174,6 +174,39 @@ function router(req, res) {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing department_id." }));
     }
+  } else if (url.startsWith("/admin/department_manager") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length === 4) {
+      const department_id = parts[3]; // Extract department_id from the URL
+      departmentManagerController.getAllManagers(req, res, department_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL." }));
+    }
+  } else if (url.startsWith("/admin/department_manager") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length === 5) {
+      const manager_id = parts[4]; // Extract manager_id from the URL
+      departmentManagerController.updateDepartmentManager(req, res, manager_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing manager_id." }));
+    }
+  } else if (
+    url.startsWith("/admin/department_manager") &&
+    method === "DELETE"
+  ) {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length === 5) {
+      const manager_id = parts[4]; // Extract manager_id from the URL
+      departmentManagerController.removeDepartmentManager(req, res, manager_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing manager_id." }));
+    }
   } else if (url.startsWith("/admin/employee") && method === "GET") {
     const parts = parsedUrl.pathname.split("/");
 
