@@ -19,7 +19,27 @@ function router(req, res) {
 	const parsedUrl = URL.parse(req.url, true);
 	const method = req.method;
 
-	if (url.startsWith("/admin/exhibit") && method === "GET") {
+	if (url.startsWith("/admin/exhibit_habitats") && method === "GET") {
+		const parts = parsedUrl.pathname.split("/");
+
+		if (parts.length >= 4) {
+			const exhibit_id = parts[3].slice(1); // Extract exhibit_id from the URL
+			habitatController.getExhibitsHabitats(req, res, exhibit_id);
+		} else {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Invalid URL missing exhibit id." }));
+		}
+	} else if (url.startsWith("/admin/habitat_animals") && method === "GET") {
+		const parts = parsedUrl.pathname.split("/");
+
+		if (parts.length >= 4) {
+			const habitat_id = parts[3].slice(1); // Extract habitat_id from the URL
+			animalController.getHabitatAnimals(req, res, habitat_id);
+		} else {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Invalid URL missing habitat id." }));
+		}
+	} else if (url.startsWith("/admin/exhibit") && method === "GET") {
 		// split the URL into parts i.e [ '', 'admin', 'exhibit' ]
 		const parts = parsedUrl.pathname.split("/");
 

@@ -57,6 +57,42 @@ const getSingleAnimal = (req, res, animal_id) => {
 	);
 };
 
+const getHabitatAnimals = (req, res, habitat_id) => {
+	dbConnection.query(
+		"SELECT * FROM animals WHERE habitat_id = ?",
+		[habitat_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			if (result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Animal does not exist",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					data: result,
+				})
+			);
+		}
+	);
+};
+
 const getAllAnimals = (req, res) => {
 	dbConnection.query("SELECT * FROM animals", (err, result) => {
 		if (err) {
@@ -291,6 +327,7 @@ const createAnimal = (req, res) => {
 
 module.exports = {
 	getSingleAnimal,
+	getHabitatAnimals,
 	getAllAnimals,
 	updateAnimal,
 	createAnimal,

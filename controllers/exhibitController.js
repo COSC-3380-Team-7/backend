@@ -32,7 +32,7 @@ const getSingleExhibit = (req, res, exhibit_id) => {
 
 const getAllExhibits = (req, res) => {
 	dbConnection.query(
-		"SELECT E.name AS exhibit_name, E.description, E.department_id, D.name AS department_name FROM exhibits AS E JOIN departments AS D ON E.department_id = D.department_id",
+		"SELECT E.exhibit_id, E.name AS exhibit_name, E.description, E.department_id, D.name AS department_name FROM exhibits AS E JOIN departments AS D ON E.department_id = D.department_id",
 		(err, result) => {
 			if (err) {
 				console.log(err);
