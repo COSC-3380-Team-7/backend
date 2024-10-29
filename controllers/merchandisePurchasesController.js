@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Merchandise Purchases Schema
@@ -10,37 +8,61 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getSinglePurchase = (req, res, visitor_id, merchandise_id) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      message: `GET /admin/merchandise/purchase?visitor_id=${visitor_id}&merchandise_id=${merchandise_id}`,
-      data: {
-        visitor_id: visitor_id,
-        merchandise_id: merchandise_id,
-        purchased_price: 19.99, // Example price, modify as necessary
-      },
-    })
+  dbConnection.query(
+    "SELECT * FROM merchandisepurchases WHERE visitor_id = ? AND merchandise_id = ?",
+    [visitor_id, merchandise_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      if (result.length === 0) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Purchase does not exist",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          data: result[0],
+        })
+      );
+    }
   );
 };
 
 const getAllPurchases = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      data: [
-        {
-          visitor_id: 1,
-          merchandise_id: 1,
-          purchased_price: 19.99,
-        },
-        {
-          visitor_id: 2,
-          merchandise_id: 2,
-          purchased_price: 9.99,
-        },
-      ],
-    })
-  );
+  dbConnection.query("SELECT * FROM merchandisepurchases", (err, result) => {
+    if (err) {
+      console.log(err);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Internal Server Error",
+        })
+      );
+      return;
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: result,
+      })
+    );
+  });
 };
 
 const createPurchase = (req, res) => {
@@ -52,16 +74,33 @@ const createPurchase = (req, res) => {
   req.on("end", () => {
     const { visitor_id, merchandise_id, purchased_price } = JSON.parse(body);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: "POST /admin/merchandise/purchase",
-        data: {
-          visitor_id,
-          merchandise_id,
-          purchased_price,
-        },
-      })
+    dbConnection.query(
+      "INSERT INTO merchandisepurchases (visitor_id, merchandise_id, purchased_price) VALUES (?, ?, ?)",
+      [visitor_id, merchandise_id, purchased_price],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Purchase has been created successfully",
+            data: {
+              visitor_id,
+              merchandise_id,
+              purchased_price,
+            },
+          })
+        );
+      }
     );
   });
 };

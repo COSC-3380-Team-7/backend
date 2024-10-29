@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Vet Report Schema
@@ -12,149 +10,185 @@ const jwt = require("jsonwebtoken");
  * animal_id: int
  * veterinarian_id: int
  * treatment: string
- * checkup_date date
+ * checkup_date: date
  * health_status: string = ["Healthy", "Sick", "Injured"]
- * created_at date
- * updated_at date
+ * created_at: date
+ * updated_at: date
  **/
 
 const getSingleVetReport = (req, res, vet_report_id) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			vet_report_id_params: vet_report_id,
-			data: {
-				vet_report_id: 1,
-				title: "Vet Report 1",
-				measured_weight: 1.0,
-				diagnosis: "Diagnosis of Vet Report 1",
-				symptoms: "Symptoms of Vet Report 1",
-				animal_id: 1,
-				veterinarian_id: 1,
-				treatment: "Treatment of Vet Report 1",
-				checkup_date: "2021-01-01",
-				health_status: "Sick",
-				created_at: "2021-01-01",
-				updated_at: "2021-01-01",
-			},
-		})
-	);
+  dbConnection.query(
+    "SELECT * FROM veterinaryreports WHERE vet_report_id = ?",
+    [vet_report_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      if (result.length === 0) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Vet report does not exist",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          data: result[0],
+        })
+      );
+    }
+  );
 };
 
-const getAllHabitats = (req, res) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			data: [
-				{
-					vet_report_id: 1,
-					title: "Vet Report 1",
-					measured_weight: 1.0,
-					diagnosis: "Diagnosis of Vet Report 1",
-					symptoms: "Symptoms of Vet Report 1",
-					animal_id: 1,
-					veterinarian_id: 1,
-					treatment: "Treatment of Vet Report 1",
-					checkup_date: "2021-01-01",
-					health_status: "Sick",
-					created_at: "2021-01-01",
-					updated_at: "2021-01-01",
-				},
-			],
-		})
-	);
+const getAllVetReports = (req, res) => {
+  dbConnection.query("SELECT * FROM veterinaryreports", (err, result) => {
+    if (err) {
+      console.log(err);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Internal Server Error",
+        })
+      );
+      return;
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: result,
+      })
+    );
+  });
 };
 
-const updateHabitat = (req, res, vet_report_id) => {
-	console.log(vet_report_id);
-	let body = "";
-	req.on("data", (chunk) => {
-		body += chunk.toString();
-	});
+const updateVetReport = (req, res, vet_report_id) => {
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
 
-	req.on("end", () => {
-		const {
-			title,
-			measured_weight,
-			diagnosis,
-			symptoms,
-			animal_id,
-			veterinarian_id,
-			treatment,
-			checkup_date,
-			health_status,
-			created_at,
-			updated_at,
-		} = JSON.parse(body);
+  req.on("end", () => {
+    const {
+      title,
+      measured_weight,
+      diagnosis,
+      symptoms,
+      animal_id,
+      veterinarian_id,
+      treatment,
+      checkup_date,
+      health_status,
+    } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: {
-					vet_report_id,
-					title,
-					measured_weight,
-					diagnosis,
-					symptoms,
-					animal_id,
-					veterinarian_id,
-					treatment,
-					checkup_date,
-					health_status,
-					created_at,
-					updated_at,
-				},
-			})
-		);
-	});
+    dbConnection.query(
+      "UPDATE veterinaryreports SET title = ?, measured_weight = ?, diagnosis = ?, symptoms = ?, animal_id = ?, veterinarian_id = ?, treatment = ?, checkup_date = ?, health_status = ? WHERE vet_report_id = ?",
+      [
+        title,
+        measured_weight,
+        diagnosis,
+        symptoms,
+        animal_id,
+        veterinarian_id,
+        treatment,
+        checkup_date,
+        health_status,
+        vet_report_id,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Vet report has been updated successfully",
+          })
+        );
+      }
+    );
+  });
 };
 
-const createHabitat = (req, res) => {
-	let body = "";
-	req.on("data", (chunk) => {
-		body += chunk.toString();
-	});
+const createVetReport = (req, res) => {
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
 
-	req.on("end", () => {
-		const {
-			title,
-			measured_weight,
-			diagnosis,
-			symptoms,
-			animal_id,
-			veterinarian_id,
-			treatment,
-			checkup_date,
-			health_status,
-			created_at,
-			updated_at,
-		} = JSON.parse(body);
+  req.on("end", () => {
+    const {
+      title,
+      measured_weight,
+      diagnosis,
+      symptoms,
+      animal_id,
+      veterinarian_id,
+      treatment,
+      checkup_date,
+      health_status,
+    } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: {
-					vet_report_id: 1234567,
-					title,
-					measured_weight,
-					diagnosis,
-					symptoms,
-					animal_id,
-					veterinarian_id,
-					treatment,
-					checkup_date,
-					health_status,
-					created_at,
-					updated_at,
-				},
-			})
-		);
-	});
+    dbConnection.query(
+      "INSERT INTO veterinaryreports (title, measured_weight, diagnosis, symptoms, animal_id, veterinarian_id, treatment, checkup_date, health_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        title,
+        measured_weight,
+        diagnosis,
+        symptoms,
+        animal_id,
+        veterinarian_id,
+        treatment,
+        checkup_date,
+        health_status,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Vet report has been created successfully",
+            vet_report_id: result.insertId,
+          })
+        );
+      }
+    );
+  });
 };
 
 module.exports = {
-	getSingleVetReport,
-	getAllHabitats,
-	updateHabitat,
-	createHabitat,
+  getSingleVetReport,
+  getAllVetReports,
+  updateVetReport,
+  createVetReport,
 };
