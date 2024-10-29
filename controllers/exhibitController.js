@@ -9,7 +9,6 @@ const { dbConnection } = require("../db.js");
  **/
 
 const getSingleExhibit = (req, res, exhibit_id) => {
-	console.log(exhibit_id);
 	dbConnection.query(
 		"SELECT * FROM exhibits WHERE exhibit_id = ?",
 		[exhibit_id],
