@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Department Schema
@@ -10,36 +8,42 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getSingleDepartment = (req, res, department_id) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			department_id_params: department_id,
-			data: {
-				department_id: 1,
-				name: "Wildlife",
-				location: "A23",
-			},
-		})
+	dbConnection.query(
+		"SELECT * FROM departments WHERE department_id = ?",
+		[department_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+			if (result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Department does not exist" }));
+				return;
+			}
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result[0] }));
+		}
 	);
 };
 
 const getAllDepartments = (req, res) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			data: [
-				{
-					department_id: 1,
-					name: "Wildlife",
-					location: "A23",
-				},
-			],
-		})
-	);
+	dbConnection.query("SELECT * FROM departments", (err, result) => {
+		if (err) {
+			console.log(err);
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Internal Server Error" }));
+			return;
+		}
+
+		res.writeHead(200, { "Content-Type": "application/json" });
+		res.end(JSON.stringify({ data: result }));
+	});
 };
 
 const updateDepartment = (req, res, department_id) => {
-	console.log(department_id);
 	let body = "";
 	req.on("data", (chunk) => {
 		body += chunk.toString();
@@ -48,11 +52,20 @@ const updateDepartment = (req, res, department_id) => {
 	req.on("end", () => {
 		const { name, location } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: { department_id, name, location },
-			})
+		dbConnection.query(
+			"UPDATE departments SET name = ?, location = ? WHERE department_id = ?",
+			[name, location, department_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ message: "Department updated successfully" }));
+			}
 		);
 	});
 };
@@ -66,11 +79,24 @@ const createDepartment = (req, res) => {
 	req.on("end", () => {
 		const { name, location } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: { department_id: 1234567, name, location },
-			})
+		dbConnection.query(
+			"INSERT INTO departments (name, location) VALUES (?, ?)",
+			[name, location],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(201, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Department created successfully",
+					})
+				);
+			}
 		);
 	});
 };

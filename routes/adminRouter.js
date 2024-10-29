@@ -12,6 +12,7 @@ const employeeController = require("../controllers/employeeController");
 const giftShopController = require("../controllers/giftShopController");
 const merchandiseController = require("../controllers/merchandiseController");
 const occupationController = require("../controllers/occupationController");
+const departmentManagerController = require("../controllers/departmentManagersController");
 
 function router(req, res) {
 	const url = req.url;
@@ -176,6 +177,19 @@ function router(req, res) {
 		} else {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing department_id." }));
+		}
+	} else if (url.startsWith("/admin/department_employee") && method === "GET") {
+		const parts = parsedUrl.pathname.split("/");
+		if (parts.length === 4) {
+			const department_id = parts[3]; // Extract department_id from the URL
+			employeeController.getDepartmentEmployees(req, res, department_id);
+		} else {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					error: "Invalid URL missing department_id of employees.",
+				})
+			);
 		}
 	} else if (url.startsWith("/admin/department_manager") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");

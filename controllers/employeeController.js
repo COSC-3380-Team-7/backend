@@ -1,9 +1,8 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
+const { dbConnection } = require("../db.js");
 const jwt = require("jsonwebtoken");
 
 /**
- * Habitat Schema
+ * Employee Schema
  * employee_id: int
  * first_name: string
  * [Optional] middle_initial: string
@@ -24,60 +23,57 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getSingleEmployee = (req, res, employee_id) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			employee_id_params: employee_id,
-			data: {
-				employee_id: 1,
-				first_name: "Employee 1",
-				middle_initial: "A",
-				last_name: "Employee 1",
-				email: "a@gmail.com",
-				phone_number: "1234567890",
-				date_of_birth: "2021-01-01",
-				address: "1234 Street",
-				salary: 1.0,
-				occupation_id: 1,
-				auth_level_id: 1,
-				department_id: 1,
-				employment_status: "Employed",
-				hire_date: "2021-01-01",
-				password: "password",
-				created_at: "2021-01-01",
-				updated_at: "2021-01-01",
-			},
-		})
+	dbConnection.query(
+		"SELECT * FROM employees WHERE employee_id = ?",
+		[employee_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+			if (result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Employee does not exist" }));
+				return;
+			}
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result[0] }));
+		}
+	);
+};
+
+const getDepartmentEmployees = (req, res, department_id) => {
+	dbConnection.query(
+		"SELECT * FROM employees WHERE department_id = ?",
+		[department_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
 	);
 };
 
 const getAllEmployees = (req, res) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			data: [
-				{
-					employee_id: 1,
-					first_name: "Employee 1",
-					middle_initial: "A",
-					last_name: "Employee 1",
-					email: "a@gmail.com",
-					phone_number: "1234567890",
-					date_of_birth: "2021-01-01",
-					address: "1234 Street",
-					salary: 1.0,
-					occupation_id: 1,
-					auth_level_id: 1,
-					department_id: 1,
-					employment_status: "Employed",
-					hire_date: "2021-01-01",
-					password: "password",
-					created_at: "2021-01-01",
-					updated_at: "2021-01-01",
-				},
-			],
-		})
-	);
+	dbConnection.query("SELECT * FROM employees", (err, result) => {
+		if (err) {
+			console.log(err);
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Internal Server Error" }));
+			return;
+		}
+
+		res.writeHead(200, { "Content-Type": "application/json" });
+		res.end(JSON.stringify({ data: result }));
+	});
 };
 
 const updateEmployee = (req, res, employee_id) => {
@@ -106,29 +102,42 @@ const updateEmployee = (req, res, employee_id) => {
 			updated_at,
 		} = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: {
-					employee_id,
-					first_name,
-					middle_initial,
-					last_name,
-					email,
-					phone_number,
-					date_of_birth,
-					address,
-					salary,
-					occupation_id,
-					auth_level_id,
-					department_id,
-					employment_status,
-					hire_date,
-					password,
-					created_at,
-					updated_at,
-				},
-			})
+		dbConnection.query(
+			"UPDATE employees SET first_name = ?, middle_initial = ?, last_name = ?, email = ?, phone_number = ?, date_of_birth = ?, address = ?, salary = ?, occupation_id = ?, auth_level_id = ?, department_id = ?, employment_status = ?, hire_date = ?, password = ?, created_at = ?, updated_at = ? WHERE employee_id = ?",
+			[
+				first_name,
+				middle_initial,
+				last_name,
+				email,
+				phone_number,
+				date_of_birth,
+				address,
+				salary,
+				occupation_id,
+				auth_level_id,
+				department_id,
+				employment_status,
+				hire_date,
+				password,
+				created_at,
+				updated_at,
+				employee_id,
+			],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Employee updated successfully",
+					})
+				);
+			}
 		);
 	});
 };
@@ -159,34 +168,47 @@ const createEmployee = (req, res) => {
 			updated_at,
 		} = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: {
-					employee_id: 1234567,
-					first_name,
-					middle_initial,
-					last_name,
-					email,
-					phone_number,
-					date_of_birth,
-					address,
-					salary,
-					occupation_id,
-					auth_level_id,
-					department_id,
-					employment_status,
-					hire_date,
-					password,
-					created_at,
-					updated_at,
-				},
-			})
+		dbConnection.query(
+			"INSERT INTO employees (first_name, middle_initial, last_name, email, phone_number, date_of_birth, address, salary, occupation_id, auth_level_id, department_id, employment_status, hire_date, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			[
+				first_name,
+				middle_initial,
+				last_name,
+				email,
+				phone_number,
+				date_of_birth,
+				address,
+				salary,
+				occupation_id,
+				auth_level_id,
+				department_id,
+				employment_status,
+				hire_date,
+				password,
+				created_at,
+				updated_at,
+			],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(201, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Employee created successfully",
+					})
+				);
+			}
 		);
 	});
 };
 
 module.exports = {
+	getDepartmentEmployees,
 	getSingleEmployee,
 	getAllEmployees,
 	updateEmployee,

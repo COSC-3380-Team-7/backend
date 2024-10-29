@@ -31,17 +31,20 @@ const getSingleExhibit = (req, res, exhibit_id) => {
 };
 
 const getAllExhibits = (req, res) => {
-	dbConnection.query("SELECT * FROM exhibits", (err, result) => {
-		if (err) {
-			console.log(err);
-			res.writeHead(500, { "Content-Type": "application/json" });
-			res.end(JSON.stringify({ error: "Internal Server Error" }));
-			return;
-		}
+	dbConnection.query(
+		"SELECT E.name AS exhibit_name, E.description, E.department_id, D.name AS department_name FROM exhibits AS E JOIN departments AS D ON E.department_id = D.department_id",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(JSON.stringify({ data: result }));
-	});
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
+	);
 };
 
 const updateExhibit = (req, res, exhibit_id) => {
