@@ -10,6 +10,7 @@ const vetReportsController = require("../controllers/vetReportsController");
 const departmentController = require("../controllers/departmentController");
 const employeeController = require("../controllers/employeeController");
 const giftShopController = require("../controllers/giftShopController");
+const merchandiseController = require("../controllers/merchandiseController");
 
 function router(req, res) {
   const url = req.url;
@@ -249,6 +250,28 @@ function router(req, res) {
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing gift shop id." }));
+    }
+  }
+  if (url.startsWith("/admin/merchandise") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const merchandise_id = parts[3]; // Extract merchandise_id from the URL
+      merchandiseController.getSingleMerchandise(req, res, merchandise_id);
+    } else {
+      merchandiseController.getAllMerchandise(req, res);
+    }
+  } else if (url.startsWith("/admin/merchandise") && method === "POST") {
+    merchandiseController.createMerchandise(req, res);
+  } else if (url.startsWith("/admin/merchandise") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const merchandise_id = parts[3]; // Extract merchandise_id from the URL
+      merchandiseController.updateMerchandise(req, res, merchandise_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing merchandise id." }));
     }
   }
 }
