@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Habitat Schema
@@ -11,38 +9,64 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getSingleHabitat = (req, res, habitat_id) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			habitat_id_params: habitat_id,
-			data: {
-				habitat_id: 1,
-				name: "Habitat 1",
-				description: "Description of Habitat 1",
-				exhibit_id: 1,
-			},
-		})
+	dbConnection.query(
+		"SELECT * FROM habitats WHERE habitat_id = ?",
+		[habitat_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			if (result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Habitat does not exist",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					data: result[0],
+				})
+			);
+		}
 	);
 };
 
 const getAllHabitats = (req, res) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			data: [
-				{
-					habitat_id: 1,
-					name: "Habitat 1",
-					description: "Description of Habitat 1",
-					exhibit_id: 1,
-				},
-			],
-		})
-	);
+	dbConnection.query("SELECT * FROM habitats", (err, result) => {
+		if (err) {
+			console.log(err);
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					error: "Internal Server Error",
+				})
+			);
+			return;
+		}
+
+		res.writeHead(200, { "Content-Type": "application/json" });
+		res.end(
+			JSON.stringify({
+				data: result,
+			})
+		);
+	});
 };
 
 const updateHabitat = (req, res, habitat_id) => {
-	console.log(habitat_id);
 	let body = "";
 	req.on("data", (chunk) => {
 		body += chunk.toString();
@@ -51,11 +75,28 @@ const updateHabitat = (req, res, habitat_id) => {
 	req.on("end", () => {
 		const { name, description, exhibit_id } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: { name, description, exhibit_id },
-			})
+		dbConnection.query(
+			"UPDATE habitats SET name = ?, description = ?, exhibit_id = ? WHERE habitat_id = ?",
+			[name, description, exhibit_id, habitat_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							error: "Internal Server Error",
+						})
+					);
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						data: { habitat_id, name, description, exhibit_id },
+					})
+				);
+			}
 		);
 	});
 };
@@ -69,11 +110,28 @@ const createHabitat = (req, res) => {
 	req.on("end", () => {
 		const { name, description, exhibit_id } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: { habitat_id: 1234567, name, description, exhibit_id },
-			})
+		dbConnection.query(
+			"INSERT INTO habitats (name, description, exhibit_id) VALUES (?, ?, ?)",
+			[name, description, exhibit_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							error: "Internal Server Error",
+						})
+					);
+					return;
+				}
+
+				res.writeHead(201, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						data: { name, description, exhibit_id },
+					})
+				);
+			}
 		);
 	});
 };

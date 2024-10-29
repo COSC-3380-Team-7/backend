@@ -1,64 +1,79 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Exhibit Schema
  * exhibit_id: int
  * name: string
  * description: string
- * location: string
  * department_id: int
  **/
 
 const getSingleExhibit = (req, res, exhibit_id) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			exhibit_id_params: exhibit_id,
-			data: {
-				exhibit_id: 1,
-				name: "Exhibit 1",
-				description: "Description of Exhibit 1",
-				location: "Location of Exhibit 1",
-				department_id: 1,
-			},
-		})
+	console.log(exhibit_id);
+	dbConnection.query(
+		"SELECT * FROM exhibits WHERE exhibit_id = ?",
+		[exhibit_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+			if (result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Exhibit does not exist" }));
+				return;
+			}
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result[0] }));
+		}
 	);
 };
 
 const getAllExhibits = (req, res) => {
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(
-		JSON.stringify({
-			data: [
-				{
-					exhibit_id: 1,
-					name: "Exhibit 1",
-					description: "Description of Exhibit 1",
-					location: "Location of Exhibit 1",
-					department_id: 1,
-				},
-			],
-		})
-	);
+	dbConnection.query("SELECT * FROM exhibits", (err, result) => {
+		if (err) {
+			console.log(err);
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Internal Server Error" }));
+			return;
+		}
+
+		res.writeHead(200, { "Content-Type": "application/json" });
+		res.end(JSON.stringify({ data: result }));
+	});
 };
 
 const updateExhibit = (req, res, exhibit_id) => {
-	console.log(exhibit_id);
 	let body = "";
 	req.on("data", (chunk) => {
 		body += chunk.toString();
 	});
 
 	req.on("end", () => {
-		const { name, description, location, department_id } = JSON.parse(body);
+		const { name, description, department_id } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: { exhibit_id, name, description, location, department_id },
-			})
+		dbConnection.query(
+			"UPDATE exhibits SET name = ?, description = ?, department_id = ? WHERE exhibit_id = ?",
+			[name, description, department_id, exhibit_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						data: {
+							message: "Exhibit updated successfully",
+						},
+					})
+				);
+			}
 		);
 	});
 };
@@ -70,19 +85,26 @@ const createExhibit = (req, res) => {
 	});
 
 	req.on("end", () => {
-		const { name, description, location, department_id } = JSON.parse(body);
+		const { name, description, department_id } = JSON.parse(body);
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: {
-					exhibit_id: 1234567,
-					name,
-					description,
-					location,
-					department_id,
-				},
-			})
+		dbConnection.query(
+			"INSERT INTO exhibits (name, description, department_id) VALUES (?, ?, ?)",
+			[name, description, department_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				} else {
+					res.writeHead(200, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							message: "Exhibit created successfully",
+						})
+					);
+				}
+			}
 		);
 	});
 };
