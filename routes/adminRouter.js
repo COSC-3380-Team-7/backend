@@ -9,6 +9,7 @@ const ticketController = require("../controllers/ticketController");
 const vetReportsController = require("../controllers/vetReportsController");
 const departmentController = require("../controllers/departmentController");
 const employeeController = require("../controllers/employeeController");
+const giftShopController = require("../controllers/giftShopController");
 
 function router(req, res) {
   const url = req.url;
@@ -227,6 +228,27 @@ function router(req, res) {
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing employee id." }));
+    }
+  } else if (url.startsWith("/admin/gift_shop") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const gift_shop_id = parts[3]; // Extract gift_shop_id from the URL
+      giftShopController.getSingleGiftShop(req, res, gift_shop_id);
+    } else {
+      giftShopController.getAllGiftShops(req, res);
+    }
+  } else if (url.startsWith("/admin/gift_shop") && method === "POST") {
+    giftShopController.createGiftShop(req, res);
+  } else if (url.startsWith("/admin/gift_shop") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const gift_shop_id = parts[3]; // Extract gift_shop_id from the URL
+      giftShopController.updateGiftShop(req, res, gift_shop_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing gift shop id." }));
     }
   }
 }
