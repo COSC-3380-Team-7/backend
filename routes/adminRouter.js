@@ -7,6 +7,7 @@ const maintenanceController = require("../controllers/maintenanceController");
 const eventController = require("../controllers/eventController");
 const ticketController = require("../controllers/ticketController");
 const vetReportsController = require("../controllers/vetReportsController");
+const departmentController = require("../controllers/departmentController");
 
 function router(req, res) {
   const url = req.url;
@@ -149,6 +150,28 @@ function router(req, res) {
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid URL missing vet_report_id." }));
+    }
+  }
+  if (url.startsWith("/admin/department") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length === 4) {
+      const department_id = parts[3]; // Extract department_id from the URL
+      departmentController.getSingleDepartment(req, res, department_id);
+    } else {
+      departmentController.getAllDepartments(req, res);
+    }
+  } else if (url.startsWith("/admin/department") && method === "POST") {
+    departmentController.createDepartment(req, res);
+  } else if (url.startsWith("/admin/department") && method === "PUT") {
+    const parts = parsedUrl.pathname.split("/");
+
+    if (parts.length >= 4) {
+      const department_id = parts[3]; // Extract department_id from the URL
+      departmentController.updateDepartment(req, res, department_id);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid URL missing department_id." }));
     }
   }
 }
