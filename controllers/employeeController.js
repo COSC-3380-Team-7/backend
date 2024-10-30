@@ -164,12 +164,10 @@ const createEmployee = (req, res) => {
 			employment_status,
 			hire_date,
 			password,
-			created_at,
-			updated_at,
 		} = JSON.parse(body);
 
 		dbConnection.query(
-			"INSERT INTO employees (first_name, middle_initial, last_name, email, phone_number, date_of_birth, address, salary, occupation_id, auth_level_id, department_id, employment_status, hire_date, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO employees (first_name, middle_initial, last_name, email, phone_number, date_of_birth, address, salary, occupation_id, auth_level_id, department_id, employment_status, hire_date, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			[
 				first_name,
 				middle_initial,
@@ -185,8 +183,6 @@ const createEmployee = (req, res) => {
 				employment_status,
 				hire_date,
 				password,
-				created_at,
-				updated_at,
 			],
 			(err, result) => {
 				if (err) {
