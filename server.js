@@ -12,7 +12,10 @@ const publicRoutes = require("./routes/publicRouter");
 const PORT = process.env.PORT || 8081;
 
 // Create a CORS middleware
-const corsMiddleware = cors();
+const corsMiddleware = cors({
+	origin: ["https://zooteam7.netlify.app", "http://localhost:5173"],
+	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+});
 
 // Create the HTTP server
 const server = http.createServer((req, res) => {
