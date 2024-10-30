@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Event Schema
@@ -15,42 +13,60 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getAllEvents = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      data: [
-        {
-          event_id: "ExINV001",
-          name: "Field trip",
-          start_time: "09:00",
-          end_time: "10:00",
-          event_date: "2022-12-12",
-          description: "School field trip",
-          event_category_id: 1, // Example category ID
-          member_exclusive: false,
-        },
-        // Add more events as needed
-      ],
-    })
-  );
+  dbConnection.query("SELECT * FROM events", (err, result) => {
+    if (err) {
+      console.log(err);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Internal Server Error",
+        })
+      );
+      return;
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: result,
+      })
+    );
+  });
 };
 
 const getSingleEvent = (req, res, event_id) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      message: `GET /admin/event/${event_id}`,
-      data: {
-        event_id: event_id,
-        name: "Field trip",
-        start_time: "09:00",
-        end_time: "10:00",
-        event_date: "2022-12-12",
-        description: "School field trip",
-        event_category_id: 1, // Example category ID
-        member_exclusive: false,
-      },
-    })
+  dbConnection.query(
+    "SELECT * FROM events WHERE event_id = ?",
+    [event_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      if (result.length === 0) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Event not found",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          data: result[0],
+        })
+      );
+    }
   );
 };
 
@@ -71,20 +87,46 @@ const createEvent = (req, res) => {
       member_exclusive,
     } = JSON.parse(body);
 
-    res.writeHead(201, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: "POST /admin/event/create",
-        data: {
-          name,
-          event_date,
-          start_time,
-          end_time,
-          event_category_id,
-          description,
-          member_exclusive,
-        },
-      })
+    dbConnection.query(
+      "INSERT INTO events (name, event_date, start_time, end_time, event_category_id, description, member_exclusive) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        name,
+        event_date,
+        start_time,
+        end_time,
+        event_category_id,
+        description,
+        member_exclusive,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Event created successfully",
+            event_id: result.insertId,
+            data: {
+              name,
+              event_date,
+              start_time,
+              end_time,
+              event_category_id,
+              description,
+              member_exclusive,
+            },
+          })
+        );
+      }
     );
   });
 };
@@ -106,21 +148,57 @@ const updateEvent = (req, res, event_id) => {
       member_exclusive,
     } = JSON.parse(body);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: `PUT /admin/event/${event_id}/edit`,
-        data: {
-          event_id,
-          name,
-          event_date,
-          start_time,
-          end_time,
-          event_category_id,
-          description,
-          member_exclusive,
-        },
-      })
+    dbConnection.query(
+      "UPDATE events SET name = ?, event_date = ?, start_time = ?, end_time = ?, event_category_id = ?, description = ?, member_exclusive = ? WHERE event_id = ?",
+      [
+        name,
+        event_date,
+        start_time,
+        end_time,
+        event_category_id,
+        description,
+        member_exclusive,
+        event_id,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        if (result.affectedRows === 0) {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Event not found",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Event updated successfully",
+            data: {
+              event_id,
+              name,
+              event_date,
+              start_time,
+              end_time,
+              event_category_id,
+              description,
+              member_exclusive,
+            },
+          })
+        );
+      }
     );
   });
 };

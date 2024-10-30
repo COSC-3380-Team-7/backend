@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Visitor Schema
@@ -14,50 +12,61 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getSingleVisitor = (req, res, visitor_id) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      message: `GET /admin/visitor/${visitor_id}`,
-      visitor_id_params: visitor_id,
-      data: {
-        visitor_id: visitor_id,
-        first_name: "John",
-        last_name: "Doe",
-        middle_initial: "A",
-        password: "hashed_password",
-        email: "john.doe@example.com",
-        membership: true,
-      },
-    })
+  dbConnection.query(
+    "SELECT * FROM visitors WHERE visitor_id = ?",
+    [visitor_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      if (result.length === 0) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Visitor does not exist",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          data: result[0],
+        })
+      );
+    }
   );
 };
 
 const getAllVisitors = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      data: [
-        {
-          visitor_id: 1,
-          first_name: "Alice",
-          last_name: "Smith",
-          middle_initial: "B",
-          password: "hashed_password_1",
-          email: "alice.smith@example.com",
-          membership: true,
-        },
-        {
-          visitor_id: 2,
-          first_name: "Bob",
-          last_name: "Johnson",
-          middle_initial: "C",
-          password: "hashed_password_2",
-          email: "bob.johnson@example.com",
-          membership: false,
-        },
-      ],
-    })
-  );
+  dbConnection.query("SELECT * FROM visitors", (err, result) => {
+    if (err) {
+      console.log(err);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Internal Server Error",
+        })
+      );
+      return;
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: result,
+      })
+    );
+  });
 };
 
 const updateVisitor = (req, res, visitor_id) => {
@@ -76,20 +85,36 @@ const updateVisitor = (req, res, visitor_id) => {
       membership,
     } = JSON.parse(body);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: `PUT /admin/visitor/${visitor_id}`,
-        data: {
-          visitor_id,
-          first_name,
-          last_name,
-          middle_initial,
-          password,
-          email,
-          membership,
-        },
-      })
+    dbConnection.query(
+      "UPDATE visitors SET first_name = ?, last_name = ?, middle_initial = ?, password = ?, email = ?, membership = ? WHERE visitor_id = ?",
+      [
+        first_name,
+        last_name,
+        middle_initial,
+        password,
+        email,
+        membership,
+        visitor_id,
+      ],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Visitor has been updated successfully",
+          })
+        );
+      }
     );
   });
 };
@@ -110,20 +135,29 @@ const createVisitor = (req, res) => {
       membership,
     } = JSON.parse(body);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: "POST /admin/visitor",
-        data: {
-          visitor_id: 1234567, // Example ID, consider generating dynamically
-          first_name,
-          last_name,
-          middle_initial,
-          password,
-          email,
-          membership,
-        },
-      })
+    dbConnection.query(
+      "INSERT INTO visitors (first_name, last_name, middle_initial, password, email, membership) VALUES (?, ?, ?, ?, ?, ?)",
+      [first_name, last_name, middle_initial, password, email, membership],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Visitor has been added successfully",
+            visitor_id: result.insertId, // Assuming the DB returns the new ID
+          })
+        );
+      }
     );
   });
 };

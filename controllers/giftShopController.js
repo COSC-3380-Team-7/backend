@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * Gift Shop Schema
@@ -11,46 +9,60 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getAllGiftShops = (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      data: [
-        {
-          gift_shop_id: 1,
-          name: "Wildlife Wonders",
-          location: "North Wing",
-          department_id: 101,
-        },
-        {
-          gift_shop_id: 2,
-          name: "Safari Souvenirs",
-          location: "East Wing",
-          department_id: 102,
-        },
-        {
-          gift_shop_id: 3,
-          name: "Jungle Treasures",
-          location: "West Wing",
-          department_id: 103,
-        },
-        // Add more gift shop entries as needed
-      ],
-    })
-  );
+  dbConnection.query("SELECT * FROM giftshops", (err, result) => {
+    if (err) {
+      console.log(err);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Internal Server Error",
+        })
+      );
+      return;
+    }
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        data: result,
+      })
+    );
+  });
 };
 
 const getSingleGiftShop = (req, res, gift_shop_id) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      message: `GET /admin/gift_shop/${gift_shop_id}`,
-      data: {
-        gift_shop_id: gift_shop_id,
-        name: "Wildlife Wonders", // Example name
-        location: "North Wing", // Example location
-        department_id: 101, // Example department ID
-      },
-    })
+  dbConnection.query(
+    "SELECT * FROM giftshops WHERE gift_shop_id = ?",
+    [gift_shop_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      if (result.length === 0) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Gift shop does not exist",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          data: result[0],
+        })
+      );
+    }
   );
 };
 
@@ -63,17 +75,34 @@ const createGiftShop = (req, res) => {
   req.on("end", () => {
     const { name, location, department_id } = JSON.parse(body);
 
-    res.writeHead(201, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: "POST /admin/gift_shop/create",
-        data: {
-          gift_shop_id: Math.floor(Math.random() * 1000), // Example ID generation
-          name,
-          location,
-          department_id,
-        },
-      })
+    dbConnection.query(
+      "INSERT INTO giftshops (name, location, department_id) VALUES (?, ?, ?)",
+      [name, location, department_id],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(201, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Gift shop has been created successfully",
+            data: {
+              gift_shop_id: result.insertId, // Assuming result contains the inserted ID
+              name,
+              location,
+              department_id,
+            },
+          })
+        );
+      }
     );
   });
 };
@@ -87,17 +116,38 @@ const updateGiftShop = (req, res, gift_shop_id) => {
   req.on("end", () => {
     const { name, location, department_id } = JSON.parse(body);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        message: `PUT /admin/gift_shop/${gift_shop_id}/edit`,
-        data: {
-          gift_shop_id,
-          name,
-          location,
-          department_id,
-        },
-      })
+    dbConnection.query(
+      "UPDATE giftshops SET name = ?, location = ?, department_id = ? WHERE gift_shop_id = ?",
+      [name, location, department_id, gift_shop_id],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        if (result.affectedRows === 0) {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Gift shop does not exist",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: "Gift shop has been updated successfully",
+          })
+        );
+      }
     );
   });
 };

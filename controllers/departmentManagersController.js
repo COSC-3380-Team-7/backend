@@ -1,6 +1,4 @@
-// const pool = require("./db.js");
-// const queries = require("./queries.js");
-const jwt = require("jsonwebtoken");
+const { dbConnection } = require("../db.js");
 
 /**
  * DepartmentManagers Schema
@@ -9,16 +7,28 @@ const jwt = require("jsonwebtoken");
  **/
 
 const getAllManagers = (req, res, department_id) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      data: [
-        {
-          manager_id: 1,
-          department_id,
-        },
-      ],
-    })
+  dbConnection.query(
+    "SELECT * FROM department_managers WHERE department_id = ?",
+    [department_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          data: result,
+        })
+      );
+    }
   );
 };
 
@@ -31,21 +41,55 @@ const updateDepartmentManager = (req, res, manager_id) => {
   req.on("end", () => {
     const { department_id } = JSON.parse(body);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        data: { manager_id, department_id },
-      })
+    dbConnection.query(
+      "UPDATE department_managers SET department_id = ? WHERE manager_id = ?",
+      [department_id, manager_id],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "Internal Server Error",
+            })
+          );
+          return;
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            message: `Manager with ID ${manager_id} has been updated successfully.`,
+          })
+        );
+      }
     );
   });
 };
 
 const removeDepartmentManager = (req, res, manager_id) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(
-    JSON.stringify({
-      message: `Manager with ID ${manager_id} removed successfully.`,
-    })
+  dbConnection.query(
+    "DELETE FROM department_managers WHERE manager_id = ?",
+    [manager_id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            error: "Internal Server Error",
+          })
+        );
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          message: `Manager with ID ${manager_id} removed successfully.`,
+        })
+      );
+    }
   );
 };
 
