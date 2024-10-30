@@ -112,7 +112,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/maintenance_report") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 		if (parts.length >= 4) {
-			const maintenance_report_id = parts[3];
+			const maintenance_report_id = parts[3].slice(1);
 			maintenanceController.getSingleMaintenanceReport(
 				req,
 				res,
@@ -158,7 +158,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/vet_report") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length === 4) {
+		if (parts.length >= 4) {
 			const vet_report_id = parts[3].slice(1); // Extract vet_report_id from the URL
 			vetReportsController.getSingleVetReport(req, res, vet_report_id);
 		} else {
@@ -179,7 +179,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/department_employee") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length === 4) {
+		if (parts.length >= 4) {
 			const department_id = parts[3].slice(1); // Extract department_id from the URL
 			employeeController.getDepartmentEmployees(req, res, department_id);
 		} else {
@@ -193,7 +193,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/department_manager") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length === 4) {
+		if (parts.length >= 4) {
 			const department_id = parts[3].slice(1); // Extract department_id from the URL
 			departmentManagerController.getAllManagers(req, res, department_id);
 		} else {
@@ -203,8 +203,8 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/department_manager") && method === "PUT") {
 		const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length === 5) {
-			const manager_id = parts[4]; // Extract manager_id from the URL
+		if (parts.length >= 4) {
+			const manager_id = parts[3].slice(1); // Extract manager_id from the URL
 			departmentManagerController.updateDepartmentManager(req, res, manager_id);
 		} else {
 			res.writeHead(400, { "Content-Type": "application/json" });
@@ -216,8 +216,8 @@ function router(req, res) {
 	) {
 		const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length === 5) {
-			const manager_id = parts[4]; // Extract manager_id from the URL
+		if (parts.length >= 4) {
+			const manager_id = parts[3].slice(1); // Extract manager_id from the URL
 			departmentManagerController.removeDepartmentManager(req, res, manager_id);
 		} else {
 			res.writeHead(400, { "Content-Type": "application/json" });
@@ -235,7 +235,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/department") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length === 4) {
+		if (parts.length >= 4) {
 			const department_id = parts[3].slice(1); // Extract department_id from the URL
 			departmentController.getSingleDepartment(req, res, department_id);
 		} else {
