@@ -134,6 +134,26 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing event id." }));
 		}
+	} else if (url.startsWith("/admin/ticket_type") && method === "GET") {
+		const parts = parsedUrl.pathname.split("/");
+
+		if (parts.length >= 4) {
+			const ticket_type_id = parts[3].slice(1); // Extract ticket_type_id from the URL
+			ticketController.getSingleTicketPrice(req, res, ticket_type_id);
+		} else {
+			ticketController.getAllTicketPricing(req, res);
+		}
+	} else if (url.startsWith("/admin/ticket_type") && method === "PUT") {
+		const parts = parsedUrl.pathname.split("/");
+		if (parts.length >= 4) {
+			const ticket_type_id = parts[3].slice(1);
+			ticketController.updateTicketPricing(req, res, ticket_type_id);
+		} else {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ error: "Invalid URL missing ticket_type_id." }));
+		}
+	} else if (url.startsWith("/admin/ticket_type") && method === "POST") {
+		ticketController.createTicketPricing(req, res, ticket_type_id);
 	} else if (url.startsWith("/admin/ticket") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 

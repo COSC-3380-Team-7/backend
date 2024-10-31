@@ -24,7 +24,7 @@ const jwt = require("jsonwebtoken");
 
 const getSingleEmployee = (req, res, employee_id) => {
 	dbConnection.query(
-		"SELECT * FROM employees WHERE employee_id = ?",
+		"SELECT e.employee_id, e.first_name, e.middle_initial, e.last_name, e.email, e.phone_number, e.date_of_birth, e.address, e.salary, e.occupation_id, e.auth_level_id, e.supervisor_id, e.department_id, e.employment_status, e.hire_date, d.name AS department_name, o.name AS occupation_name FROM employees AS e JOIN departments AS d ON e.department_id = d.department_id JOIN occupation AS o ON o.occupation_id = e.occupation_id WHERE e.employee_id = ?",
 		[employee_id],
 		(err, result) => {
 			if (err) {
@@ -98,8 +98,6 @@ const updateEmployee = (req, res, employee_id) => {
 			employment_status,
 			hire_date,
 			password,
-			created_at,
-			updated_at,
 		} = JSON.parse(body);
 
 		dbConnection.query(
@@ -119,8 +117,6 @@ const updateEmployee = (req, res, employee_id) => {
 				employment_status,
 				hire_date,
 				password,
-				created_at,
-				updated_at,
 				employee_id,
 			],
 			(err, result) => {
