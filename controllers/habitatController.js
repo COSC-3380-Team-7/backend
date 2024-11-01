@@ -71,7 +71,7 @@ const getExhibitsHabitats = (req, res, exhibit_id) => {
 };
 
 const getAllHabitats = (req, res) => {
-	dbConnection.query("SELECT * FROM habitats", (err, result) => {
+	dbConnection.query("SELECT * FROM habitats ORDER BY name", (err, result) => {
 		if (err) {
 			console.log(err);
 			res.writeHead(500, { "Content-Type": "application/json" });
