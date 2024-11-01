@@ -121,9 +121,18 @@ function router(req, res) {
 		} else {
 			maintenanceController.getAllMaintenanceReports(req, res);
 		}
+	} else if (url.startsWith("/admin/event_category") && method === "GET") {
+		eventController.getEventCategories(req, res);
 	} else if (url.startsWith("/admin/event") && method === "GET") {
-		eventController.getAllEvents(req, res);
-	} else if (url.startsWith("/admin/event/create") && method === "POST") {
+		const parts = parsedUrl.pathname.split("/");
+
+		if (parts.length >= 4) {
+			const event_id = parts[3].slice(1); // Extract event_id from the URL
+			eventController.getSingleEvent(req, res, event_id);
+		} else {
+			eventController.getAllEvents(req, res);
+		}
+	} else if (url.startsWith("/admin/event") && method === "POST") {
 		eventController.createEvent(req, res);
 	} else if (url.startsWith("/admin/event") && method === "PUT") {
 		const parts = parsedUrl.pathname.split("/");
