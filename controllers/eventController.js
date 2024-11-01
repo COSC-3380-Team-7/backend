@@ -13,25 +13,28 @@ const { dbConnection } = require("../db.js");
  **/
 
 const getAllEvents = (req, res) => {
-	dbConnection.query("SELECT * FROM events", (err, result) => {
-		if (err) {
-			console.log(err);
-			res.writeHead(500, { "Content-Type": "application/json" });
+	dbConnection.query(
+		"SELECT * FROM events ORDER BY created_at DESC",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
 			res.end(
 				JSON.stringify({
-					error: "Internal Server Error",
+					data: result,
 				})
 			);
-			return;
 		}
-
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: result,
-			})
-		);
-	});
+	);
 };
 
 const getSingleEvent = (req, res, event_id) => {
@@ -225,10 +228,36 @@ const getEventCategories = (req, res) => {
 	});
 };
 
+const getTodaysEvents = (req, res) => {
+	dbConnection.query(
+		"SELECT * FROM events AS e JOIN eventcategory AS ec ON e.event_category_id = ec.event_category_id where e.event_date = CURDATE() ORDER BY e.start_time",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					data: result,
+				})
+			);
+		}
+	);
+};
+
 module.exports = {
 	getAllEvents,
 	getSingleEvent,
 	createEvent,
 	updateEvent,
 	getEventCategories,
+	getTodaysEvents,
 };

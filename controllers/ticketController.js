@@ -138,35 +138,38 @@ const createTicket = (req, res) => {
 };
 
 const getAllTicketPricing = (req, res) => {
-	dbConnection.query("SELECT * FROM tickettype", (err, result) => {
-		if (err) {
-			console.log(err);
-			res.writeHead(500, { "Content-Type": "application/json" });
+	dbConnection.query(
+		"SELECT * FROM tickettype ORDER BY price",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			if (!result || result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "No ticket pricing data found",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
 			res.end(
 				JSON.stringify({
-					error: "Internal Server Error",
+					data: result,
 				})
 			);
-			return;
 		}
-
-		if (!result || result.length === 0) {
-			res.writeHead(404, { "Content-Type": "application/json" });
-			res.end(
-				JSON.stringify({
-					error: "No ticket pricing data found",
-				})
-			);
-			return;
-		}
-
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(
-			JSON.stringify({
-				data: result,
-			})
-		);
-	});
+	);
 };
 
 const updateTicketPricing = (req, res, ticket_type_id) => {
