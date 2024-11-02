@@ -1,5 +1,5 @@
 const { dbConnection } = require("../db.js");
-const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 /**
  * Employee Schema
@@ -162,6 +162,8 @@ const createEmployee = (req, res) => {
 			password,
 		} = JSON.parse(body);
 
+		const hash = bcrypt.hashSync(password, 10);
+
 		dbConnection.query(
 			"INSERT INTO employees (first_name, middle_initial, last_name, email, phone_number, date_of_birth, address, salary, occupation_id, auth_level_id, department_id, employment_status, hire_date, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			[
@@ -178,7 +180,7 @@ const createEmployee = (req, res) => {
 				department_id,
 				employment_status,
 				hire_date,
-				password,
+				hash,
 			],
 			(err, result) => {
 				if (err) {

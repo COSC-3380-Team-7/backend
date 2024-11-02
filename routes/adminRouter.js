@@ -14,6 +14,7 @@ const merchandiseController = require("../controllers/merchandiseController");
 const occupationController = require("../controllers/occupationController");
 const departmentManagerController = require("../controllers/departmentManagersController");
 const visitorController = require("../controllers/visitorController");
+const authController = require("../controllers/authController");
 
 function router(req, res) {
 	const url = req.url;
@@ -373,6 +374,8 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing visitor id." }));
 		}
+	} else if (url.startsWith("/admin/login") && method === "POST") {
+		authController.adminLogin(req, res);
 	} else {
 		res.writeHead(404, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ error: "Route not found" }));
