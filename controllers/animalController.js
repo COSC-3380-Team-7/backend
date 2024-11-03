@@ -125,6 +125,7 @@ const updateAnimal = (req, res, animal_id) => {
 		const {
 			name,
 			scientific_name,
+			nickname,
 			height,
 			weight,
 			date_of_birth,
@@ -160,10 +161,11 @@ const updateAnimal = (req, res, animal_id) => {
 			}
 
 			dbConnection.query(
-				"Update animals set name = ?, scientific_name = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, image_cloud_link = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
+				"Update animals set name = ?, scientific_name = ?, nickname= ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, image_cloud_link = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
 				[
 					name,
 					scientific_name,
+					nickname,
 					height,
 					weight,
 					date_of_birth,
@@ -200,10 +202,11 @@ const updateAnimal = (req, res, animal_id) => {
 			);
 		} else {
 			dbConnection.query(
-				"Update animals set name = ?, scientific_name = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
+				"Update animals set name = ?, scientific_name = ?, nickname = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
 				[
 					name,
 					scientific_name,
+					nickname,
 					height,
 					weight,
 					date_of_birth,
@@ -251,6 +254,7 @@ const createAnimal = (req, res) => {
 		const {
 			name,
 			scientific_name,
+			nickname,
 			height,
 			weight,
 			date_of_birth,
@@ -285,10 +289,11 @@ const createAnimal = (req, res) => {
 		}
 
 		dbConnection.query(
-			"Insert into animals (name, scientific_name, height, weight, date_of_birth, gender, origin, arrival_date, animal_fact, geographic_range, image_cloud_link, conservation_status, availability_status, habitat_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"Insert into animals (name, scientific_name, nickname, height, weight, date_of_birth, gender, origin, arrival_date, animal_fact, geographic_range, image_cloud_link, conservation_status, availability_status, habitat_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			[
 				name,
 				scientific_name,
+				nickname,
 				height,
 				weight,
 				date_of_birth,

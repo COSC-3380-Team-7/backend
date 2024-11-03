@@ -110,6 +110,32 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing animal id." }));
 		}
+	} else if (
+		url.startsWith("/admin/query_maintenance_report") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const habitat_name = query["habitat_name"];
+		const working_status = query["working_status"];
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+
+		if (!habitat_name || !start_date || !end_date || !working_status) {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({ error: "Invalid URL missing query parameters." })
+			);
+			return;
+		}
+
+		maintenanceController.getMaintenceReportsByHabitat(
+			req,
+			res,
+			habitat_name,
+			working_status,
+			start_date,
+			end_date
+		);
 	} else if (url.startsWith("/admin/maintenance_report") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 		if (parts.length >= 4) {
@@ -121,6 +147,23 @@ function router(req, res) {
 			);
 		} else {
 			maintenanceController.getAllMaintenanceReports(req, res);
+		}
+	} else if (url.startsWith("/admin/maintenance_report") && method === "POST") {
+		maintenanceController.createMaintenanceReport(req, res);
+	} else if (url.startsWith("/admin/maintenance_report") && method === "PUT") {
+		const parts = parsedUrl.pathname.split("/");
+		if (parts.length >= 4) {
+			const maintenance_report_id = parts[3].slice(1);
+			maintenanceController.updateMaintenanceReport(
+				req,
+				res,
+				maintenance_report_id
+			);
+		} else {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({ error: "Invalid URL missing maintenance report id." })
+			);
 		}
 	} else if (url.startsWith("/admin/event_category") && method === "GET") {
 		eventController.getEventCategories(req, res);
@@ -194,6 +237,26 @@ function router(req, res) {
 		} else {
 			vetReportsController.getAllVetReports(req, res);
 		}
+	} else if (url.startsWith("/admin/queried_vet_report") && method === "GET") {
+		const query = parsedUrl.query;
+		const animal_name = query["name"];
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+
+		if (!animal_name || !start_date || !end_date) {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({ error: "Invalid URL missing query parameters." })
+			);
+		}
+
+		vetReportsController.getVetReportsByAnimal(
+			req,
+			res,
+			animal_name,
+			start_date,
+			end_date
+		);
 	} else if (url.startsWith("/admin/vet_report") && method === "POST") {
 		vetReportsController.createVetReport(req, res);
 	} else if (url.startsWith("/admin/vet_report") && method === "PUT") {
@@ -376,6 +439,8 @@ function router(req, res) {
 		}
 	} else if (url.startsWith("/admin/login") && method === "POST") {
 		authController.adminLogin(req, res);
+	} else if (url.startsWith("/admin/auth_levels") && method === "GET") {
+		authController.getAuthLevels(req, res);
 	} else {
 		res.writeHead(404, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ error: "Route not found" }));
