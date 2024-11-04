@@ -59,7 +59,7 @@ const getSingleAnimal = (req, res, animal_id) => {
 
 const getHabitatAnimals = (req, res, habitat_id) => {
 	dbConnection.query(
-		"SELECT * FROM animals WHERE habitat_id = ?",
+		"SELECT * FROM animals WHERE habitat_id = ? AND availability_status = 'Present'",
 		[habitat_id],
 		(err, result) => {
 			if (err) {
@@ -330,9 +330,36 @@ const createAnimal = (req, res) => {
 	});
 };
 
+const getAnimalByName = (req, res, animal_name) => {
+	dbConnection.query(
+		"SELECT * FROM animals WHERE name = ? AND availability_status = 'Present'",
+		[animal_name],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					data: result,
+				})
+			);
+		}
+	);
+};
+
 module.exports = {
 	getSingleAnimal,
 	getHabitatAnimals,
+	getAnimalByName,
 	getAllAnimals,
 	updateAnimal,
 	createAnimal,
