@@ -24,7 +24,7 @@ const bcrypt = require("bcrypt");
 
 const getSingleEmployee = (req, res, employee_id) => {
 	dbConnection.query(
-		"SELECT e.employee_id, e.first_name, e.middle_initial, e.last_name, e.email, e.phone_number, e.date_of_birth, e.address, e.salary, e.occupation_id, e.auth_level_id, e.supervisor_id, e.department_id, e.employment_status, e.hire_date, d.name AS department_name, o.name AS occupation_name FROM employees AS e JOIN departments AS d ON e.department_id = d.department_id JOIN occupation AS o ON o.occupation_id = e.occupation_id WHERE e.employee_id = ?",
+		"SELECT e.employee_id, e.first_name, e.middle_initial, e.last_name, e.email, e.phone_number, e.date_of_birth, e.address, e.salary, e.occupation_id, e.auth_level_id, e.manager_id, e.department_id, e.employment_status, e.hire_date, d.name AS department_name, o.name AS occupation_name, a.title as position FROM employees AS e JOIN departments AS d ON e.department_id = d.department_id JOIN occupation AS o ON o.occupation_id = e.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE e.employee_id = ? AND e.employment_status = 'Employed'",
 		[employee_id],
 		(err, result) => {
 			if (err) {
@@ -46,7 +46,7 @@ const getSingleEmployee = (req, res, employee_id) => {
 
 const getDepartmentEmployees = (req, res, department_id) => {
 	dbConnection.query(
-		"SELECT * FROM employees AS e JOIN occupation AS o ON e.occupation_id = o.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE department_id = ? AND e.employment_status = 'Employed'",
+		"SELECT e.employee_id, e.first_name, e.last_name, o.name as occupation, a.title FROM employees AS e JOIN occupation AS o ON e.occupation_id = o.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE department_id = ? AND e.employment_status = 'Employed' AND e.employment_status = 'Employed'",
 		[department_id],
 		(err, result) => {
 			if (err) {
@@ -162,6 +162,136 @@ const updateEmployee = (req, res, employee_id) => {
 	});
 };
 
+const updateEmployeePersonalInfo = (req, res) => {
+	let body = "";
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		const {
+			first_name,
+			middle_initial,
+			last_name,
+			email,
+			phone_number,
+			date_of_birth,
+			address,
+			employee_id,
+		} = JSON.parse(body);
+
+		dbConnection.query(
+			"UPDATE employees SET first_name = ?, middle_initial = ?, last_name = ?, email = ?, phone_number = ?, date_of_birth = ?, address = ? WHERE employee_id = ?",
+			[
+				first_name,
+				middle_initial,
+				last_name,
+				email,
+				phone_number,
+				date_of_birth,
+				address,
+				employee_id,
+			],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Employee updated successfully",
+					})
+				);
+			}
+		);
+	});
+};
+
+const updateEmployeeEmploymentInfo = (req, res) => {
+	let body = "";
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		const {
+			salary,
+			occupation_id,
+			auth_level_id,
+			department_id,
+			employment_status,
+			hire_date,
+			password,
+			employee_id,
+		} = JSON.parse(body);
+
+		if (!password) {
+			dbConnection.query(
+				"UPDATE employees SET salary = ?, occupation_id = ?, auth_level_id = ?, department_id = ?, employment_status = ?, hire_date = ? WHERE employee_id = ?",
+				[
+					salary,
+					occupation_id,
+					auth_level_id,
+					department_id,
+					employment_status,
+					hire_date,
+					employee_id,
+				],
+				(err, result) => {
+					if (err) {
+						console.log(err);
+						res.writeHead(500, { "Content-Type": "application/json" });
+						res.end(JSON.stringify({ error: "Internal Server Error" }));
+						return;
+					}
+
+					res.writeHead(200, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							message: "Employee updated successfully",
+						})
+					);
+				}
+			);
+		} else {
+			const hash = bcrypt.hashSync(password, 10);
+
+			dbConnection.query(
+				"UPDATE employees SET salary = ?, occupation_id = ?, auth_level_id = ?, department_id = ?, employment_status = ?, hire_date = ?, password = ? WHERE employee_id = ?",
+				[
+					salary,
+					occupation_id,
+					auth_level_id,
+					department_id,
+					employment_status,
+					hire_date,
+					hash,
+					employee_id,
+				],
+				(err, result) => {
+					if (err) {
+						console.log(err);
+						res.writeHead(500, { "Content-Type": "application/json" });
+						res.end(JSON.stringify({ error: "Internal Server Error" }));
+						return;
+					}
+
+					res.writeHead(200, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							message: "Employee updated successfully",
+						})
+					);
+				}
+			);
+		}
+	});
+};
+
 const createEmployee = (req, res) => {
 	let body = "";
 	req.on("data", (chunk) => {
@@ -262,6 +392,8 @@ module.exports = {
 	getSingleEmployee,
 	getAllEmployees,
 	updateEmployee,
+	updateEmployeePersonalInfo,
+	updateEmployeeEmploymentInfo,
 	createEmployee,
 	assignDepartment,
 };
