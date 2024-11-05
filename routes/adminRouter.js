@@ -358,6 +358,10 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing department_id." }));
 		}
+	} else if (url.startsWith("/admin/employee_personal") && method === "PUT") {
+		employeeController.updateEmployeePersonalInfo(req, res);
+	} else if (url.startsWith("/admin/employee_employment") && method === "PUT") {
+		employeeController.updateEmployeeEmploymentInfo(req, res);
 	} else if (url.startsWith("/admin/employee") && method === "POST") {
 		employeeController.createEmployee(req, res);
 	} else if (url.startsWith("/admin/employee") && method === "PUT") {
@@ -481,6 +485,17 @@ function router(req, res) {
 		method === "PUT"
 	) {
 		employeeController.assignDepartment(req, res);
+	} else if (url.startsWith("/admin/query_habitat_name") && method === "GET") {
+		const query = parsedUrl.query;
+		const name = query["name"];
+
+		if (!name) {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({ error: "Invalid URL missing query parameters." })
+			);
+		}
+		habitatController.getHabitatsByName(req, res, name);
 	} else {
 		res.writeHead(404, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ error: "Route not found" }));
