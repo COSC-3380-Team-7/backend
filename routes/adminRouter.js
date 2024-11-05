@@ -89,6 +89,18 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing habitat id." }));
 		}
+	} else if (url.startsWith("/admin/query_animal_name") && method === "GET") {
+		const query = parsedUrl.query;
+		const animal_name = query["name"];
+
+		if (!animal_name) {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({ error: "Invalid URL missing query parameters." })
+			);
+		}
+
+		animalController.getAnimalByName(req, res, animal_name);
 	} else if (url.startsWith("/admin/animal") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
@@ -441,6 +453,34 @@ function router(req, res) {
 		authController.adminLogin(req, res);
 	} else if (url.startsWith("/admin/auth_levels") && method === "GET") {
 		authController.getAuthLevels(req, res);
+	} else if (
+		url.startsWith("/admin/other_department_employees") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const first_name = query["first_name"];
+		const last_name = query["last_name"];
+		const department_id = query["department_id"];
+
+		if (!first_name || !last_name || !department_id) {
+			res.writeHead(400, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({ error: "Invalid URL missing query parameters." })
+			);
+		}
+
+		employeeController.getDifferentDepartmentEmployees(
+			req,
+			res,
+			department_id,
+			first_name,
+			last_name
+		);
+	} else if (
+		url.startsWith("/admin/assign_employee_department") &&
+		method === "PUT"
+	) {
+		employeeController.assignDepartment(req, res);
 	} else {
 		res.writeHead(404, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ error: "Route not found" }));

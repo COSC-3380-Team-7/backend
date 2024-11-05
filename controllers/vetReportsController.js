@@ -192,7 +192,7 @@ const createVetReport = (req, res) => {
 
 const getVetReportsByAnimal = (req, res, animal_name, start_date, end_date) => {
 	dbConnection.query(
-		"SELECT vr.vet_report_id, vr.title, vr.measured_weight, vr.diagnosis, vr.symptoms, vr.animal_id, vr.health_status, vr.veterinarian_id, vr.checkup_date, vr.created_at, vr.updated_at, vr.treatment, a.name AS animal_name, e.first_name, e.last_name FROM veterinaryreports AS vr JOIN animals AS a ON vr.animal_id = a.animal_id JOIN employees AS e ON vr.veterinarian_id = e.employee_id WHERE a.name = ? AND vr.checkup_date BETWEEN ? AND ? ORDER BY a.name",
+		"SELECT vr.vet_report_id, vr.title, vr.measured_weight, vr.diagnosis, vr.symptoms, vr.animal_id, vr.health_status, vr.veterinarian_id, vr.checkup_date, vr.created_at, vr.updated_at, vr.treatment, a.name AS animal_name, a.nickname, e.first_name, e.last_name FROM veterinaryreports AS vr JOIN animals AS a ON vr.animal_id = a.animal_id JOIN employees AS e ON vr.veterinarian_id = e.employee_id WHERE a.name = ? AND vr.checkup_date BETWEEN ? AND ? ORDER BY a.name",
 		[animal_name, start_date, end_date],
 		(err, result) => {
 			if (err) {

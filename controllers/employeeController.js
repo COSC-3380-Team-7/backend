@@ -46,8 +46,32 @@ const getSingleEmployee = (req, res, employee_id) => {
 
 const getDepartmentEmployees = (req, res, department_id) => {
 	dbConnection.query(
-		"SELECT * FROM employees WHERE department_id = ?",
+		"SELECT * FROM employees AS e JOIN occupation AS o ON e.occupation_id = o.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE department_id = ? AND e.employment_status = 'Employed'",
 		[department_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
+	);
+};
+
+const getDifferentDepartmentEmployees = (
+	req,
+	res,
+	department_id,
+	first_name,
+	last_name
+) => {
+	dbConnection.query(
+		"SELECT e.employee_id, e.first_name, e.last_name, d.name as department_name, a.title, o.name as occupation_name FROM employees AS e JOIN occupation AS o ON e.occupation_id = o.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id JOIN departments AS D ON e.department_id = d.department_id WHERE e.department_id != ? AND e.first_name = ? AND e.last_name = ? AND e.employment_status = 'Employed'",
+		[department_id, first_name, last_name],
 		(err, result) => {
 			if (err) {
 				console.log(err);
@@ -201,10 +225,43 @@ const createEmployee = (req, res) => {
 	});
 };
 
+const assignDepartment = (req, res) => {
+	let body = "";
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		const { department_id, employee_id } = JSON.parse(body);
+
+		dbConnection.query(
+			"UPDATE employees SET department_id = ? WHERE employee_id = ?",
+			[department_id, employee_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Department assigned successfully",
+					})
+				);
+			}
+		);
+	});
+};
+
 module.exports = {
 	getDepartmentEmployees,
+	getDifferentDepartmentEmployees,
 	getSingleEmployee,
 	getAllEmployees,
 	updateEmployee,
 	createEmployee,
+	assignDepartment,
 };
