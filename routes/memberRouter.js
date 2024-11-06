@@ -1,5 +1,6 @@
 // const controller = require("./controller");
 const { URL } = require("url"); // Import the URL class
+const authController = require("../controllers/authController");
 
 function router(req, res) {
 	const url = req.url;
@@ -9,8 +10,7 @@ function router(req, res) {
 		res.writeHead(200, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ message: "GET /member/ticket" }));
 	} else if (url.startsWith("/member/login") && method === "POST") {
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(JSON.stringify({ message: "POST /member/login" }));
+		authController.memberLogin(req, res);
 	}
 }
 

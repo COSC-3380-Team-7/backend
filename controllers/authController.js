@@ -161,7 +161,7 @@ const memberLogin = (req, res) => {
 		const { email, password } = JSON.parse(body);
 
 		dbConnection.query(
-			"SELECT employee_id, email, password FROM visitors WHERE email = ?",
+			"SELECT * FROM visitors WHERE email = ?",
 			[email],
 			(err, result) => {
 				if (err) {
@@ -178,24 +178,26 @@ const memberLogin = (req, res) => {
 				}
 
 				const member = result[0];
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ data: member }));
 
-				bcrypt.compare(password, member.password, (err, same) => {
-					if (err) {
-						console.log(err);
-						res.writeHead(500, { "Content-Type": "application/json" });
-						res.end(JSON.stringify({ error: "Internal Server Error" }));
-						return;
-					}
+				// bcrypt.compare(password, member.password, (err, same) => {
+				// 	if (err) {
+				// 		console.log(err);
+				// 		res.writeHead(500, { "Content-Type": "application/json" });
+				// 		res.end(JSON.stringify({ error: "Internal Server Error" }));
+				// 		return;
+				// 	}
 
-					if (!same) {
-						res.writeHead(401, { "Content-Type": "application/json" });
-						res.end(JSON.stringify({ error: "Invalid login credentials" }));
-						return;
-					}
+				// 	if (!same) {
+				// 		res.writeHead(401, { "Content-Type": "application/json" });
+				// 		res.end(JSON.stringify({ error: "Invalid login credentials" }));
+				// 		return;
+				// 	}
 
-					res.writeHead(200, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ member_id: member.employee_id }));
-				});
+				// 	res.writeHead(200, { "Content-Type": "application/json" });
+				// 	res.end(JSON.stringify({ member_id: member.employee_id }));
+				// });
 			}
 		);
 	});
