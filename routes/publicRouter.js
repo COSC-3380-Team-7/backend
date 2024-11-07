@@ -1,54 +1,71 @@
-const URL = require("url"); // Import the URL class
+const URL = require("url");
 const animalController = require("../controllers/animalController");
 const exhibitController = require("../controllers/exhibitController");
 const habitatController = require("../controllers/habitatController");
 const eventController = require("../controllers/eventController");
+const profileController = require("../controllers/profileController"); // Add the profile controller
 
 function router(req, res) {
-	const url = req.url;
-	const parsedUrl = URL.parse(req.url, true);
-	const method = req.method;
+  const url = req.url;
+  const parsedUrl = URL.parse(req.url, true);
+  const method = req.method;
 
-	if (url.startsWith("/public/exhibit") && method === "GET") {
-		const parts = parsedUrl.pathname.split("/");
+  // Handling /public/exhibit route
+  if (url.startsWith("/public/exhibit") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+    if (parts.length >= 4) {
+      const exhibit_id = parts[3].slice(1);
+      exhibitController.getSingleExhibit(req, res, exhibit_id.slice(1));
+    } else {
+      exhibitController.getAllExhibits(req, res);
+    }
+  }
 
-		if (parts.length >= 4) {
-			const exhibit_id = parts[3].slice(1); // Extract exhibit_id from the URL
-			exhibitController.getSingleExhibit(req, res, exhibit_id.slice(1));
-		} else {
-			exhibitController.getAllExhibits(req, res);
-		}
-	} else if (url.startsWith("/public/habitat") && method === "GET") {
-		const parts = parsedUrl.pathname.split("/");
+  // Handling /public/habitat route
+  else if (url.startsWith("/public/habitat") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+    if (parts.length >= 4) {
+      const habitat_id = parts[3].slice(1);
+      habitatController.getSingleHabitat(req, res, habitat_id);
+    } else {
+      habitatController.getAllHabitats(req, res);
+    }
+  }
 
-		if (parts.length >= 4) {
-			const habitat_id = parts[3].slice(1); // Extract habitat_id from the URL
-			// const query = parsedUrl.query;
-			// const exhibit_id = query["exhibit_id"];
+  // Handling /public/animal route
+  else if (url.startsWith("/public/animal") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+    if (parts.length >= 4) {
+      const animal_id = parts[3].slice(1);
+      animalController.getSingleAnimal(req, res, animal_id);
+    } else {
+      animalController.getAllAnimals(req, res);
+    }
+  }
 
-			habitatController.getSingleHabitat(req, res, habitat_id);
-		} else {
-			habitatController.getAllHabitats(req, res);
-		}
-	} else if (url.startsWith("/public/animal") && method === "GET") {
-		const parts = parsedUrl.pathname.split("/");
+  // Handling /public/event route
+  else if (url.startsWith("/public/event") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+    if (parts.length >= 4) {
+      const event_id = parts[3].slice(1);
+      eventController.getSingleEvent(req, res, event_id);
+    } else {
+      eventController.getTodaysEvents(req, res);
+    }
+  }
 
-		if (parts.length >= 4) {
-			const animal_id = parts[3].slice(1); // Extract animal_id from the URL
-			animalController.getSingleAnimal(req, res, animal_id);
-		} else {
-			animalController.getAllAnimals(req, res);
-		}
-	} else if (url.startsWith("/public/event") && method === "GET") {
-		const parts = parsedUrl.pathname.split("/");
+  // Handling /public/profile route (with visitorId)
+  else if (url.startsWith("/public/profile") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
 
-		if (parts.length >= 4) {
-			const event_id = parts[3].slice(1); // Extract event_id from the URL
-			eventController.getSingleEvent(req, res, event_id);
-		} else {
-			eventController.getTodaysEvents(req, res);
-		}
-	}
+    if (parts.length >= 4) {
+      const visitorId = parts[3].slice(1); // Extract visitorId from URL
+      profileController.getProfileAndPurchases(req, res, visitorId);
+    } else {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid visitor ID" }));
+    }
+  }
 }
 
 module.exports = router;
