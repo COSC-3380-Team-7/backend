@@ -134,13 +134,14 @@ const createMaintenanceReport = (req, res) => {
 			working_status,
 			habitat_id,
 			employee_id,
+			maintenance_date,
 			created_at,
 			updated_at,
 			completed_at,
 		} = JSON.parse(body);
 
 		dbConnection.query(
-			"INSERT INTO maintenancereports (title, maintenance_cause, details, working_status, habitat_id, employee_id, created_at, updated_at, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"INSERT INTO maintenancereports (title, maintenance_cause, details, working_status, habitat_id, employee_id, maintenance_date, created_at, updated_at, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			[
 				title,
 				maintenance_cause,
@@ -148,6 +149,7 @@ const createMaintenanceReport = (req, res) => {
 				working_status,
 				habitat_id,
 				employee_id,
+				maintenance_date,
 				created_at,
 				updated_at,
 				completed_at,
@@ -195,7 +197,7 @@ const getMaintenceReportsByHabitat = (
     FROM maintenancereports as mr 
     JOIN employees as e ON mr.employee_id = e.employee_id 
     JOIN habitats as h ON mr.habitat_id = h.habitat_id 
-    WHERE h.name = ? AND mr.created_at BETWEEN ? AND ? AND mr.working_status = ?`,
+    WHERE h.name = ? AND mr.created_at BETWEEN ? AND ? AND mr.working_status = ? ORDER BY mr.created_at DESC`,
 		[habitat_name, start_date, end_date, working_status],
 		(err, result) => {
 			if (err) {

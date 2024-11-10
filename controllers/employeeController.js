@@ -62,6 +62,24 @@ const getDepartmentEmployees = (req, res, department_id) => {
 	);
 };
 
+const getSupervisedEmployees = (req, res, supervisor_id) => {
+	dbConnection.query(
+		"SELECT e.employee_id, e.first_name, e.last_name, o.name as occupation, a.title FROM employees AS e JOIN occupation AS o ON e.occupation_id = o.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE manager_id = ? AND e.employment_status = 'Employed'",
+		[supervisor_id],
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
+	);
+};
+
 const getDifferentDepartmentEmployees = (
 	req,
 	res,
@@ -396,4 +414,5 @@ module.exports = {
 	updateEmployeeEmploymentInfo,
 	createEmployee,
 	assignDepartment,
+	getSupervisedEmployees,
 };

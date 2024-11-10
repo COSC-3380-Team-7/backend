@@ -330,10 +330,10 @@ const createAnimal = (req, res) => {
 	});
 };
 
-const getAnimalByName = (req, res, animal_name) => {
+const getAnimalByName = (req, res, animal_name, nickname) => {
 	dbConnection.query(
-		"SELECT * FROM animals WHERE name = ? AND availability_status = 'Present'",
-		[animal_name],
+		"SELECT * FROM animals WHERE name = ? AND availability_status = 'Present' AND nickname = ? ORDER BY name, nickname",
+		[animal_name, nickname],
 		(err, result) => {
 			if (err) {
 				console.log(err);

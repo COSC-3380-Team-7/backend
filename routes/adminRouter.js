@@ -92,6 +92,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/query_animal_name") && method === "GET") {
 		const query = parsedUrl.query;
 		const animal_name = query["name"];
+		const nickname = query["nickname"];
 
 		if (!animal_name) {
 			res.writeHead(400, { "Content-Type": "application/json" });
@@ -100,7 +101,7 @@ function router(req, res) {
 			);
 		}
 
-		animalController.getAnimalByName(req, res, animal_name);
+		animalController.getAnimalByName(req, res, animal_name, nickname);
 	} else if (url.startsWith("/admin/animal") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
@@ -252,6 +253,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/queried_vet_report") && method === "GET") {
 		const query = parsedUrl.query;
 		const animal_name = query["name"];
+		const nickname = query["nickname"];
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
 
@@ -266,6 +268,7 @@ function router(req, res) {
 			req,
 			res,
 			animal_name,
+			nickname,
 			start_date,
 			end_date
 		);
