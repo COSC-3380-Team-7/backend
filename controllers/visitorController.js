@@ -135,9 +135,13 @@ const createVisitor = (req, res) => {
       membership,
     } = JSON.parse(body);
 
+    // If membership is undefined or null, set it to false
+    const membershipValue =
+      typeof membership !== "undefined" ? membership : false;
+
     dbConnection.query(
       "INSERT INTO visitors (first_name, last_name, middle_initial, password, email, membership) VALUES (?, ?, ?, ?, ?, ?)",
-      [first_name, last_name, middle_initial, password, email, membership],
+      [first_name, last_name, middle_initial, password, email, membershipValue],
       (err, result) => {
         if (err) {
           console.log(err);
