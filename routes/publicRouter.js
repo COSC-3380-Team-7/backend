@@ -3,7 +3,8 @@ const animalController = require("../controllers/animalController");
 const exhibitController = require("../controllers/exhibitController");
 const habitatController = require("../controllers/habitatController");
 const eventController = require("../controllers/eventController");
-const profileController = require("../controllers/profileController"); // Add the profile controller
+const profileController = require("../controllers/profileController");
+const visitorController = require("../controllers/visitorController");
 
 function router(req, res) {
   const url = req.url;
@@ -65,6 +66,11 @@ function router(req, res) {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid visitor ID" }));
     }
+  }
+
+  //Sign up Page
+  else if (url.startsWith("/public/signup") && method === "POST") {
+    visitorController.createVisitor(req, res);
   }
 }
 
