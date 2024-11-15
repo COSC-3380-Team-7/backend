@@ -130,6 +130,8 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing animal id." }));
 		}
+	} else if (url.startsWith("/admin/update_availability") && method === "PUT") {
+		animalController.updateAvailability(req, res);
 	} else if (
 		url.startsWith("/admin/query_maintenance_report") &&
 		method === "GET"
