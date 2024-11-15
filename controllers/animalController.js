@@ -137,7 +137,6 @@ const updateAnimal = (req, res, animal_id) => {
 			image,
 			image_filename,
 			conservation_status,
-			availability_status,
 			habitat_id,
 		} = JSON.parse(body);
 
@@ -161,7 +160,7 @@ const updateAnimal = (req, res, animal_id) => {
 			}
 
 			dbConnection.query(
-				"Update animals set name = ?, scientific_name = ?, nickname= ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, image_cloud_link = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
+				"Update animals set name = ?, scientific_name = ?, nickname= ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, image_cloud_link = ?, conservation_status = ?, habitat_id = ? where animal_id = ?",
 				[
 					name,
 					scientific_name,
@@ -176,7 +175,6 @@ const updateAnimal = (req, res, animal_id) => {
 					geographic_range,
 					image_cloud_link.public_id,
 					conservation_status,
-					availability_status,
 					habitat_id,
 					animal_id,
 				],
@@ -202,7 +200,7 @@ const updateAnimal = (req, res, animal_id) => {
 			);
 		} else {
 			dbConnection.query(
-				"Update animals set name = ?, scientific_name = ?, nickname = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
+				"Update animals set name = ?, scientific_name = ?, nickname = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, conservation_status = ?, habitat_id = ? where animal_id = ?",
 				[
 					name,
 					scientific_name,
@@ -216,7 +214,6 @@ const updateAnimal = (req, res, animal_id) => {
 					animal_fact,
 					geographic_range,
 					conservation_status,
-					availability_status,
 					habitat_id,
 					animal_id,
 				],
