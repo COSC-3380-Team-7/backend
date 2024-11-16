@@ -18,7 +18,7 @@ function router(req, res) {
       const exhibit_id = parts[3].slice(1);
       exhibitController.getSingleExhibit(req, res, exhibit_id.slice(1));
     } else {
-      exhibitController.getAllExhibits(req, res);
+      exhibitController.getOpenExhibits(req, res);
     }
   }
 
@@ -29,7 +29,7 @@ function router(req, res) {
       const habitat_id = parts[3].slice(1);
       habitatController.getSingleHabitat(req, res, habitat_id);
     } else {
-      habitatController.getAllHabitats(req, res);
+      habitatController.getOpenHabitats(req, res);
     }
   }
 
@@ -40,7 +40,7 @@ function router(req, res) {
       const animal_id = parts[3].slice(1);
       animalController.getSingleAnimal(req, res, animal_id);
     } else {
-      animalController.getAllAnimals(req, res);
+      animalController.getAllAnimalsPresent(req, res);
     }
   }
 

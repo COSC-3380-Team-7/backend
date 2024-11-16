@@ -137,7 +137,6 @@ const updateAnimal = (req, res, animal_id) => {
 			image,
 			image_filename,
 			conservation_status,
-			availability_status,
 			habitat_id,
 		} = JSON.parse(body);
 
@@ -161,7 +160,7 @@ const updateAnimal = (req, res, animal_id) => {
 			}
 
 			dbConnection.query(
-				"Update animals set name = ?, scientific_name = ?, nickname= ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, image_cloud_link = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
+				"Update animals set name = ?, scientific_name = ?, nickname= ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, image_cloud_link = ?, conservation_status = ?, habitat_id = ? where animal_id = ?",
 				[
 					name,
 					scientific_name,
@@ -176,7 +175,6 @@ const updateAnimal = (req, res, animal_id) => {
 					geographic_range,
 					image_cloud_link.public_id,
 					conservation_status,
-					availability_status,
 					habitat_id,
 					animal_id,
 				],
@@ -202,7 +200,7 @@ const updateAnimal = (req, res, animal_id) => {
 			);
 		} else {
 			dbConnection.query(
-				"Update animals set name = ?, scientific_name = ?, nickname = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, conservation_status = ?, availability_status = ?, habitat_id = ? where animal_id = ?",
+				"Update animals set name = ?, scientific_name = ?, nickname = ?, height = ?, weight = ?, date_of_birth = ?, gender = ?, origin = ?, arrival_date = ?, animal_fact = ?, geographic_range = ?, conservation_status = ?, habitat_id = ? where animal_id = ?",
 				[
 					name,
 					scientific_name,
@@ -216,7 +214,6 @@ const updateAnimal = (req, res, animal_id) => {
 					animal_fact,
 					geographic_range,
 					conservation_status,
-					availability_status,
 					habitat_id,
 					animal_id,
 				],
@@ -356,11 +353,74 @@ const getAnimalByName = (req, res, animal_name, nickname) => {
 	);
 };
 
+const updateAvailability = (req, res) => {
+	let body = "";
+
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		const { availability_status, animal_id } = JSON.parse(body);
+
+		dbConnection.query(
+			"UPDATE animals SET availability_status = ? WHERE animal_id = ?",
+			[availability_status, animal_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							error: "Internal Server Error",
+						})
+					);
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Animal has been removed successfully",
+					})
+				);
+			}
+		);
+	});
+};
+
+const getAllAnimalsPresent = (req, res) => {
+	dbConnection.query(
+		"SELECT * FROM animals WHERE availability_status = 'Present' ORDER BY name",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						error: "Internal Server Error",
+					})
+				);
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					data: result,
+				})
+			);
+		}
+	);
+};
+
 module.exports = {
 	getSingleAnimal,
 	getHabitatAnimals,
 	getAnimalByName,
 	getAllAnimals,
+	getAllAnimalsPresent,
 	updateAnimal,
 	createAnimal,
+	updateAvailability,
 };

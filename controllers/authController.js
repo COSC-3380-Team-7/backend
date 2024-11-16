@@ -61,7 +61,7 @@ const managerLogin = (req, res) => {
 		const { email, password } = JSON.parse(body);
 
 		dbConnection.query(
-			"SELECT e.employee_id, e.email, e.password, o.name AS occupation FROM employees AS e JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id JOIN occupation o ON e.occupation_id = o.occupation_id WHERE e.email = ? AND a.title = 'Manager'",
+			"SELECT e.employee_id, e.email, e.password, o.name AS occupation FROM employees AS e JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id JOIN occupation o ON e.occupation_id = o.occupation_id WHERE e.email = ? AND a.title = 'Manager' AND e.employment_status = 'Employed'",
 			[email],
 			(err, result) => {
 				if (err) {
@@ -118,7 +118,7 @@ const employeeLogin = (req, res) => {
 		const { email, password } = JSON.parse(body);
 
 		dbConnection.query(
-			"SELECT e.employee_id, e.email, e.password FROM employees AS e JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE e.email = ? AND a.title = 'Employee'",
+			"SELECT e.employee_id, e.email, e.password FROM employees AS e JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE e.email = ? AND a.title = 'Employee' AND e.employment_status = 'Employed'",
 			[email],
 			(err, result) => {
 				if (err) {

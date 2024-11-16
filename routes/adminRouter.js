@@ -41,6 +41,13 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing habitat id." }));
 		}
+	} else if (
+		url.startsWith("/admin/exhibit_availability") &&
+		method === "PUT"
+	) {
+		exhibitController.updateExhibitAvailability(req, res);
+	} else if (url.startsWith("/admin/all_exhibits") && method === "GET") {
+		exhibitController.getAllExhibits(req, res);
 	} else if (url.startsWith("/admin/exhibit") && method === "GET") {
 		// split the URL into parts i.e [ '', 'admin', 'exhibit' ]
 		const parts = parsedUrl.pathname.split("/");
@@ -49,7 +56,7 @@ function router(req, res) {
 			const exhibit_id = parts[3].slice(1); // Extract exhibit_id from the URL
 			exhibitController.getSingleExhibit(req, res, exhibit_id);
 		} else {
-			exhibitController.getAllExhibits(req, res);
+			exhibitController.getOpenExhibits(req, res);
 		}
 	} else if (url.startsWith("/admin/exhibit") && method === "POST") {
 		exhibitController.createExhibit(req, res);
@@ -123,6 +130,8 @@ function router(req, res) {
 			res.writeHead(400, { "Content-Type": "application/json" });
 			res.end(JSON.stringify({ error: "Invalid URL missing animal id." }));
 		}
+	} else if (url.startsWith("/admin/update_availability") && method === "PUT") {
+		animalController.updateAvailability(req, res);
 	} else if (
 		url.startsWith("/admin/query_maintenance_report") &&
 		method === "GET"

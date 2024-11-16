@@ -24,7 +24,7 @@ const bcrypt = require("bcrypt");
 
 const getSingleEmployee = (req, res, employee_id) => {
 	dbConnection.query(
-		"SELECT e.employee_id, e.first_name, e.middle_initial, e.last_name, e.email, e.phone_number, e.date_of_birth, e.address, e.salary, e.occupation_id, e.auth_level_id, e.manager_id, e.department_id, e.employment_status, e.hire_date, d.name AS department_name, o.name AS occupation_name, a.title as position FROM employees AS e JOIN departments AS d ON e.department_id = d.department_id JOIN occupation AS o ON o.occupation_id = e.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE e.employee_id = ? AND e.employment_status = 'Employed'",
+		"SELECT e.employee_id, e.first_name, e.middle_initial, e.last_name, e.email, e.phone_number, e.date_of_birth, e.address, e.salary, e.occupation_id, e.auth_level_id, e.manager_id, e.department_id, e.employment_status, e.hire_date, d.name AS department_name, o.name AS occupation_name, a.title as position FROM employees AS e JOIN departments AS d ON e.department_id = d.department_id JOIN occupation AS o ON o.occupation_id = e.occupation_id JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE e.employee_id = ?",
 		[employee_id],
 		(err, result) => {
 			if (err) {
@@ -137,13 +137,12 @@ const updateEmployee = (req, res, employee_id) => {
 			occupation_id,
 			auth_level_id,
 			department_id,
-			employment_status,
 			hire_date,
 			password,
 		} = JSON.parse(body);
 
 		dbConnection.query(
-			"UPDATE employees SET first_name = ?, middle_initial = ?, last_name = ?, email = ?, phone_number = ?, date_of_birth = ?, address = ?, salary = ?, occupation_id = ?, auth_level_id = ?, department_id = ?, employment_status = ?, hire_date = ?, password = ?, created_at = ?, updated_at = ? WHERE employee_id = ?",
+			"UPDATE employees SET first_name = ?, middle_initial = ?, last_name = ?, email = ?, phone_number = ?, date_of_birth = ?, address = ?, salary = ?, occupation_id = ?, auth_level_id = ?, department_id = ?, hire_date = ?, password = ?, created_at = ?, updated_at = ? WHERE employee_id = ?",
 			[
 				first_name,
 				middle_initial,
@@ -156,7 +155,6 @@ const updateEmployee = (req, res, employee_id) => {
 				occupation_id,
 				auth_level_id,
 				department_id,
-				employment_status,
 				hire_date,
 				password,
 				employee_id,
@@ -336,24 +334,10 @@ const createEmployee = (req, res) => {
 
 		const hash = bcrypt.hashSync(password, 10);
 
+		// Check if email already exists
 		dbConnection.query(
-			"INSERT INTO employees (first_name, middle_initial, last_name, email, phone_number, date_of_birth, address, salary, occupation_id, auth_level_id, department_id, employment_status, hire_date, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			[
-				first_name,
-				middle_initial,
-				last_name,
-				email,
-				phone_number,
-				date_of_birth,
-				address,
-				salary,
-				occupation_id,
-				auth_level_id,
-				department_id,
-				employment_status,
-				hire_date,
-				hash,
-			],
+			"SELECT email FROM employees WHERE email = ?",
+			[email],
 			(err, result) => {
 				if (err) {
 					console.log(err);
@@ -362,11 +346,50 @@ const createEmployee = (req, res) => {
 					return;
 				}
 
-				res.writeHead(201, { "Content-Type": "application/json" });
-				res.end(
-					JSON.stringify({
-						message: "Employee created successfully",
-					})
+				if (result.length > 0) {
+					res.writeHead(400, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							error_message: "Employee with email already exists",
+						})
+					);
+					return;
+				}
+
+				// Insert new employee
+				dbConnection.query(
+					"INSERT INTO employees (first_name, middle_initial, last_name, email, phone_number, date_of_birth, address, salary, occupation_id, auth_level_id, department_id, employment_status, hire_date, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					[
+						first_name,
+						middle_initial,
+						last_name,
+						email,
+						phone_number,
+						date_of_birth,
+						address,
+						salary,
+						occupation_id,
+						auth_level_id,
+						department_id,
+						employment_status,
+						hire_date,
+						hash,
+					],
+					(err, result) => {
+						if (err) {
+							console.log(err);
+							res.writeHead(500, { "Content-Type": "application/json" });
+							res.end(JSON.stringify({ error: "Internal Server Error" }));
+							return;
+						}
+
+						res.writeHead(201, { "Content-Type": "application/json" });
+						res.end(
+							JSON.stringify({
+								message: "Employee created successfully",
+							})
+						);
+					}
 				);
 			}
 		);
@@ -404,6 +427,83 @@ const assignDepartment = (req, res) => {
 	});
 };
 
+const getPastEmployees = (req, res) => {
+	dbConnection.query(
+		"SELECT * FROM employees WHERE employment_status != 'Employed'",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
+	);
+};
+
+const rehireEmployee = (req, res) => {
+	let body = "";
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		dbConnection.query(
+			"UPDATE employees SET employment_status = 'Employed' WHERE employee_id = ?",
+			[employee_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Employee rehired successfully",
+					})
+				);
+			}
+		);
+	});
+};
+
+const promoteEmployee = (req, res) => {
+	let body = "";
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		const { auth_level_id, employee_id } = JSON.parse(body);
+
+		dbConnection.query(
+			"UPDATE employees SET auth_level_id = ? WHERE employee_id = ?",
+			[auth_level_id, employee_id],
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Employee promoted successfully",
+					})
+				);
+			}
+		);
+	});
+};
+
 module.exports = {
 	getDepartmentEmployees,
 	getDifferentDepartmentEmployees,
@@ -415,4 +515,5 @@ module.exports = {
 	createEmployee,
 	assignDepartment,
 	getSupervisedEmployees,
+	rehireEmployee,
 };
