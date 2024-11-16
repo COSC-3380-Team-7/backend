@@ -15,6 +15,8 @@ const occupationController = require("../controllers/occupationController");
 const departmentManagerController = require("../controllers/departmentManagersController");
 const visitorController = require("../controllers/visitorController");
 const authController = require("../controllers/authController");
+const triggerController = require("../controllers/triggerController");
+const animalfoodController = require("../controllers/animalfoodController");
 
 function router(req, res) {
 	const url = req.url;
@@ -46,6 +48,11 @@ function router(req, res) {
 		method === "PUT"
 	) {
 		exhibitController.updateExhibitAvailability(req, res);
+	} else if (
+		url.startsWith("/admin/habitat_availability") &&
+		method === "PUT"
+	) {
+		habitatController.updateHabitatAvailability(req, res);
 	} else if (url.startsWith("/admin/all_exhibits") && method === "GET") {
 		exhibitController.getAllExhibits(req, res);
 	} else if (url.startsWith("/admin/exhibit") && method === "GET") {
@@ -56,7 +63,7 @@ function router(req, res) {
 			const exhibit_id = parts[3].slice(1); // Extract exhibit_id from the URL
 			exhibitController.getSingleExhibit(req, res, exhibit_id);
 		} else {
-			exhibitController.getOpenExhibits(req, res);
+			exhibitController.getAllExhibits(req, res);
 		}
 	} else if (url.startsWith("/admin/exhibit") && method === "POST") {
 		exhibitController.createExhibit(req, res);
@@ -508,6 +515,8 @@ function router(req, res) {
 			);
 		}
 		habitatController.getHabitatsByName(req, res, name);
+	} else if (url.startsWith("/admin/trigger") && method === "GET") {
+		triggerController.testTrigger(req, res);
 	} else {
 		res.writeHead(404, { "Content-Type": "application/json" });
 		res.end(JSON.stringify({ error: "Route not found" }));

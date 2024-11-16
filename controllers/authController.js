@@ -118,7 +118,7 @@ const employeeLogin = (req, res) => {
 		const { email, password } = JSON.parse(body);
 
 		dbConnection.query(
-			"SELECT e.employee_id, e.email, e.password FROM employees AS e JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id WHERE e.email = ? AND a.title = 'Employee' AND e.employment_status = 'Employed'",
+			"SELECT e.employee_id, e.email, e.password, o.name as occupation FROM employees AS e JOIN authlevel AS a ON e.auth_level_id = a.auth_level_id JOIN occupation AS o ON e.occupation_id = o.occupation_id WHERE e.email = ? AND a.title = 'Employee' AND e.employment_status = 'Employed'",
 			[email],
 			(err, result) => {
 				if (err) {
@@ -135,6 +135,7 @@ const employeeLogin = (req, res) => {
 				}
 
 				const employee = result[0];
+				console.log(employee);
 
 				bcrypt.compare(password, employee.password, (err, same) => {
 					if (err) {
@@ -151,7 +152,12 @@ const employeeLogin = (req, res) => {
 					}
 
 					res.writeHead(200, { "Content-Type": "application/json" });
-					res.end(JSON.stringify({ employee_id: employee.employee_id }));
+					res.end(
+						JSON.stringify({
+							employee_id: employee.employee_id,
+							occupation: employee.occupation,
+						})
+					);
 				});
 			}
 		);

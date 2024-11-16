@@ -59,7 +59,7 @@ const getSingleAnimal = (req, res, animal_id) => {
 
 const getHabitatAnimals = (req, res, habitat_id) => {
 	dbConnection.query(
-		"SELECT * FROM animals WHERE habitat_id = ? AND availability_status = 'Present'",
+		"SELECT * FROM animals WHERE habitat_id = ?",
 		[habitat_id],
 		(err, result) => {
 			if (err) {
