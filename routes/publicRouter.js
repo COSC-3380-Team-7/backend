@@ -3,7 +3,7 @@ const animalController = require("../controllers/animalController");
 const exhibitController = require("../controllers/exhibitController");
 const habitatController = require("../controllers/habitatController");
 const eventController = require("../controllers/eventController");
-const profileController = require("../controllers/profileController");
+//const profileController = require("../controllers/profileController");
 const visitorController = require("../controllers/visitorController");
 
 function router(req, res) {
@@ -61,7 +61,7 @@ function router(req, res) {
 
     if (parts.length >= 4) {
       const visitorId = parts[3].slice(1); // Extract visitorId from URL
-      profileController.getProfileAndPurchases(req, res, visitorId);
+      visitorController.getSingleVisitor(req, res, visitorId);
     } else {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid visitor ID" }));

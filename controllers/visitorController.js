@@ -13,7 +13,7 @@ const { dbConnection } = require("../db.js");
 
 const getSingleVisitor = (req, res, visitor_id) => {
   dbConnection.query(
-    "SELECT * FROM visitors WHERE visitor_id = ?",
+    "SELECT first_name, middle_initial, last_name, password, email FROM visitors WHERE visitor_id = ?",
     [visitor_id],
     (err, result) => {
       if (err) {
