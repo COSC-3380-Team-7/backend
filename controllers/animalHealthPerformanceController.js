@@ -5,7 +5,7 @@ const getRawAnimalFoodEatenMetrics = (req, res) => {
 		`SELECT 
             a.animal_id,
             a.name AS animal_name,
-            a.scientific_name,
+            a.nickname,
             f.food_name,
             f.food_type,
             af.quantity AS amount_eaten,
@@ -42,6 +42,7 @@ const getAnimalFoodEatenMetricsByNameDate = (
 	req,
 	res,
 	animal_name,
+	nickname,
 	start_date,
 	end_date
 ) => {
@@ -49,7 +50,7 @@ const getAnimalFoodEatenMetricsByNameDate = (
 		`SELECT 
             a.animal_id,
             a.name AS animal_name,
-            a.scientific_name,
+            a.nickname,
             f.food_name,
             f.food_type,
             af.quantity AS amount_eaten,
@@ -63,10 +64,11 @@ const getAnimalFoodEatenMetricsByNameDate = (
         WHERE 
             af.feeding_date BETWEEN ? AND ?
             AND a.name = ?
+            AND a.nickname = ?
         ORDER BY 
             a.name, af.feeding_date DESC
         `,
-		[start_date, end_date, animal_name],
+		[start_date, end_date, animal_name, nickname],
 		(err, results) => {
 			if (err) {
 				console.log(err);
@@ -90,7 +92,7 @@ const getRawVetReportMetrics = (req, res) => {
 		`SELECT 
             a.animal_id,
             a.name AS animal_name,
-            a.scientific_name,
+            a.nickname,
             vr.measured_weight,
             vr.measured_height,
             vr.health_status,
@@ -125,6 +127,7 @@ const getVetReportMetricsByNameDate = (
 	req,
 	res,
 	animal_name,
+	nickname,
 	start_date,
 	end_date
 ) => {
@@ -132,7 +135,7 @@ const getVetReportMetricsByNameDate = (
 		`SELECT 
             a.animal_id,
             a.name AS animal_name,
-            a.scientific_name,
+            a.nickname,
             vr.measured_weight,
             vr.measured_height,
             vr.health_status,
@@ -144,10 +147,11 @@ const getVetReportMetricsByNameDate = (
         WHERE 
             vr.checkup_date BETWEEN ? AND ?
             AND a.name = ?
+            AND a.nickname = ?
         ORDER BY 
             a.name, vr.checkup_date DESC
         `,
-		[start_date, end_date, animal_name],
+		[start_date, end_date, animal_name, nickname],
 		(err, results) => {
 			if (err) {
 				console.log(err);
@@ -171,7 +175,7 @@ const getAnimalHealthPerformance = (req, res) => {
 		`SELECT 
             a.animal_id,
             a.name AS animal_name,
-            a.scientific_name,
+            a.nickname,
             SUM(af.quantity) AS total_food_quantity,
             GROUP_CONCAT(DISTINCT f.food_name SEPARATOR ', ') AS food_types,
             MIN(vr.measured_weight) AS min_weight,
@@ -192,7 +196,7 @@ const getAnimalHealthPerformance = (req, res) => {
         JOIN 
             veterinaryreports vr ON a.animal_id = vr.animal_id
         GROUP BY 
-            a.animal_id, a.name, a.scientific_name
+            a.animal_id, a.name, a.nickname
         ORDER BY 
             a.name
         `,
@@ -219,6 +223,7 @@ const getAnimalHealthPerformanceByNameDate = (
 	req,
 	res,
 	animal_name,
+	nickname,
 	start_date,
 	end_date
 ) => {
@@ -226,7 +231,7 @@ const getAnimalHealthPerformanceByNameDate = (
 		`SELECT 
             a.animal_id,
             a.name AS animal_name,
-            a.scientific_name,
+            a.nickname,
             SUM(af.quantity) AS total_food_quantity,
             GROUP_CONCAT(DISTINCT f.food_name SEPARATOR ', ') AS food_types,
             MIN(vr.measured_weight) AS min_weight,
@@ -250,12 +255,13 @@ const getAnimalHealthPerformanceByNameDate = (
             af.feeding_date BETWEEN ? AND ?
             AND vr.checkup_date BETWEEN ? AND ?
             AND a.name = ?
+            AND a.nickname = ?
         GROUP BY 
-            a.animal_id, a.name, a.scientific_name
+            a.animal_id, a.name, a.nickname
         ORDER BY 
             a.name;
         `,
-		[start_date, end_date, start_date, end_date, animal_name],
+		[start_date, end_date, start_date, end_date, animal_name, nickname],
 		(err, results) => {
 			if (err) {
 				console.log(err);

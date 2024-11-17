@@ -227,16 +227,9 @@ function router(req, res) {
 			ticketController.getAllTicketPricing(req, res);
 		}
 	} else if (url.startsWith("/admin/ticket_type") && method === "PUT") {
-		const parts = parsedUrl.pathname.split("/");
-		if (parts.length >= 4) {
-			const ticket_type_id = parts[3].slice(1);
-			ticketController.updateTicketPricing(req, res, ticket_type_id);
-		} else {
-			res.writeHead(400, { "Content-Type": "application/json" });
-			res.end(JSON.stringify({ error: "Invalid URL missing ticket_type_id." }));
-		}
+		ticketController.updateTicketPricing(req, res);
 	} else if (url.startsWith("/admin/ticket_type") && method === "POST") {
-		ticketController.createTicketPricing(req, res, ticket_type_id);
+		ticketController.createTicketPricing(req, res);
 	} else if (url.startsWith("/admin/ticket") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
@@ -556,14 +549,16 @@ function router(req, res) {
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
 		const animal_name = query["animal_name"];
+		const nickname = query["nickname"];
 
-		if (!start_date || !end_date || !animal_name) {
+		if (!start_date || !end_date || !animal_name || !nickname) {
 			animalHealthPerformanceController.getRawVetReportMetrics(req, res);
 		} else {
 			animalHealthPerformanceController.getVetReportMetricsByNameDate(
 				req,
 				res,
 				animal_name,
+				nickname,
 				start_date,
 				end_date
 			);
@@ -576,14 +571,16 @@ function router(req, res) {
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
 		const animal_name = query["animal_name"];
+		const nickname = query["nickname"];
 
-		if (!start_date || !end_date || !animal_name) {
+		if (!start_date || !end_date || !animal_name || !nickname) {
 			animalHealthPerformanceController.getRawAnimalFoodEatenMetrics(req, res);
 		} else {
 			animalHealthPerformanceController.getAnimalFoodEatenMetricsByNameDate(
 				req,
 				res,
 				animal_name,
+				nickname,
 				start_date,
 				end_date
 			);
@@ -596,14 +593,16 @@ function router(req, res) {
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
 		const animal_name = query["animal_name"];
+		const nickname = query["nickname"];
 
-		if (!start_date || !end_date || !animal_name) {
+		if (!start_date || !end_date || !animal_name || !nickname) {
 			animalHealthPerformanceController.getAnimalHealthPerformance(req, res);
 		} else {
 			animalHealthPerformanceController.getAnimalHealthPerformanceByNameDate(
 				req,
 				res,
 				animal_name,
+				nickname,
 				start_date,
 				end_date
 			);
