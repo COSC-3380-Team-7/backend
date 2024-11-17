@@ -197,17 +197,8 @@ const updateEmployeePersonalInfo = (req, res) => {
 		} = JSON.parse(body);
 
 		dbConnection.query(
-			"UPDATE employees SET first_name = ?, middle_initial = ?, last_name = ?, email = ?, phone_number = ?, date_of_birth = ?, address = ? WHERE employee_id = ?",
-			[
-				first_name,
-				middle_initial,
-				last_name,
-				email,
-				phone_number,
-				date_of_birth,
-				address,
-				employee_id,
-			],
+			"SELECT email FROM employees WHERE email = ? AND employee_id != ?",
+			[email, employee_id],
 			(err, result) => {
 				if (err) {
 					console.log(err);
@@ -216,11 +207,44 @@ const updateEmployeePersonalInfo = (req, res) => {
 					return;
 				}
 
-				res.writeHead(200, { "Content-Type": "application/json" });
-				res.end(
-					JSON.stringify({
-						message: "Employee updated successfully",
-					})
+				if (result.length > 0) {
+					res.writeHead(400, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({
+							error_message: "Employee with email already exists",
+						})
+					);
+					return;
+				}
+
+				// Update employee personal info
+				dbConnection.query(
+					"UPDATE employees SET first_name = ?, middle_initial = ?, last_name = ?, email = ?, phone_number = ?, date_of_birth = ?, address = ? WHERE employee_id = ?",
+					[
+						first_name,
+						middle_initial,
+						last_name,
+						email,
+						phone_number,
+						date_of_birth,
+						address,
+						employee_id,
+					],
+					(err, result) => {
+						if (err) {
+							console.log(err);
+							res.writeHead(500, { "Content-Type": "application/json" });
+							res.end(JSON.stringify({ error: "Internal Server Error" }));
+							return;
+						}
+
+						res.writeHead(200, { "Content-Type": "application/json" });
+						res.end(
+							JSON.stringify({
+								message: "Employee updated successfully",
+							})
+						);
+					}
 				);
 			}
 		);

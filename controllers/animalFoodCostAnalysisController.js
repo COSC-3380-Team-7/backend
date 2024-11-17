@@ -129,7 +129,7 @@ const getCostAnalysis = (req, res) => {
 	);
 };
 
-const getRawCostDataByDate = (req, res, start_date, end_date) => {
+const getRawCostDataByDate = (req, res, animal_name, start_date, end_date) => {
 	dbConnection.query(
 		`SELECT 
 			a.name,
@@ -147,9 +147,10 @@ const getRawCostDataByDate = (req, res, start_date, end_date) => {
 			JOIN animalfoodpurchases AS afp ON af.animal_food_id = afp.animal_food_id
 			WHERE afp.date_purchased BETWEEN ? AND ?
 			AND afe.feeding_date BETWEEN ? AND ?
+			AND a.name = ?
 			ORDER BY a.name, afp.date_purchased DESC
 		`,
-		[start_date, end_date, start_date, end_date],
+		[start_date, end_date, start_date, end_date, animal_name],
 		(err, results) => {
 			if (err) {
 				console.log(err);
@@ -168,7 +169,7 @@ const getRawCostDataByDate = (req, res, start_date, end_date) => {
 	);
 };
 
-const getCostAnalysisByDate = (req, res, start_date, end_date) => {
+const getCostAnalysisByDate = (req, res, animal_name, start_date, end_date) => {
 	dbConnection.query(
 		`SELECT
             a.name,
@@ -185,10 +186,11 @@ const getCostAnalysisByDate = (req, res, start_date, end_date) => {
         WHERE
             afp.date_purchased BETWEEN ? AND ?
             AND afe.feeding_date BETWEEN ? AND ?
+			AND a.name = ?
         GROUP BY a.name, af.food_name, af.food_type
         ORDER BY a.name, af.food_name
         `,
-		[start_date, end_date, start_date, end_date],
+		[start_date, end_date, start_date, end_date, animal_name],
 		(err, results) => {
 			if (err) {
 				console.log(err);

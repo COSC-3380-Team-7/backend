@@ -3,6 +3,7 @@ const URL = require("url"); // Import the URL class
 const employeeController = require("../controllers/employeeController");
 const authController = require("../controllers/authController");
 const animalfoodController = require("../controllers/animalfoodController");
+const vetReportsController = require("../controllers/vetReportsController");
 
 function router(req, res) {
 	const url = req.url;
@@ -47,6 +48,14 @@ function router(req, res) {
 		animalfoodController.purchaseAnimalFood(req, res);
 	} else if (url.startsWith("/manager/feed_animal") && method === "POST") {
 		animalfoodController.feedAnimal(req, res);
+	} else if (
+		url.startsWith("/manager/update_animal_health") &&
+		method === "PUT"
+	) {
+		vetReportsController.setAnimalHealthStatus(req, res);
+	} else {
+		res.writeHead(404, { "Content-Type": "application/json" });
+		res.end(JSON.stringify({ error: "Route not found" }));
 	}
 }
 

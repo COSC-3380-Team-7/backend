@@ -1,17 +1,21 @@
 const { dbConnection } = require("../db.js");
+const { restockNotificationStoredProcedure } = require("./triggerUtil.js");
 
 const getAllAnimalFood = (req, res) => {
-	dbConnection.query("SELECT * FROM animalfood", (err, result) => {
-		if (err) {
-			console.log(err);
-			res.writeHead(500, { "Content-Type": "application/json" });
-			res.end(JSON.stringify({ error: "Internal Server Error" }));
-			return;
-		}
+	dbConnection.query(
+		"SELECT * FROM animalfood Order By food_name",
+		(err, result) => {
+			if (err) {
+				console.log(err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
 
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(JSON.stringify({ data: result }));
-	});
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
+	);
 };
 
 const createAnimalFood = (req, res) => {
@@ -74,6 +78,10 @@ const updateAnimalFood = (req, res) => {
 					res.writeHead(500, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ error: "Internal Server Error" }));
 					return;
+				}
+
+				if (stock === 0) {
+					restockNotificationStoredProcedure();
 				}
 
 				res.writeHead(200, { "Content-Type": "application/json" });
@@ -238,7 +246,7 @@ const feedAnimal = (req, res) => {
 
 				const currentStock = result[0].stock;
 
-				if (currentStock < quantity) {
+				if (currentStock < quantity || currentStock === 0) {
 					res.writeHead(400, { "Content-Type": "application/json" });
 					res.end(
 						JSON.stringify({
@@ -272,6 +280,10 @@ const feedAnimal = (req, res) => {
 									res.writeHead(500, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ error: "Internal Server Error" }));
 									return;
+								}
+
+								if (newStock === 0) {
+									restockNotificationStoredProcedure();
 								}
 
 								res.writeHead(200, { "Content-Type": "application/json" });

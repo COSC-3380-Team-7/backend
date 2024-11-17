@@ -74,60 +74,74 @@ const testTrigger = async (req, res) => {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 	*/
+	res.writeHead(200, { "Content-Type": "application/json" });
+	res.end(JSON.stringify({ message: "Test Trigger" }));
 
-	const sentFrom = new Sender(process.env.MAILERSEND_FROM_EMAIL, "Brandon");
+	return;
 
-	const recipients = [
-		new Recipient("chung.brandon123@gmail.com", "Your Client"),
-	];
+	const sentFrom = new Sender(process.env.MAILERSEND_FROM_EMAIL, "Baker Zoo");
 
 	conn
 		.promise()
-		.query("SELECT `email`, `message` FROM `animal_food_restock_email_queue`")
+		.query(
+			"SELECT `email_que_id`, `email`, `message`, `first_name`, `last_name` FROM `animal_food_restock_email_queue`"
+		)
 		.then(async ([rows, fields]) => {
+			if (rows.length === 0) {
+				console.log("No emails to send.");
+				return;
+			}
+
 			await new Promise((resolve) => setTimeout(resolve, 5000));
-			/*
-				{
-				email: 'jsmith@gmail.com',
-				message: 'Lettuce is out of stock. Please restock.'
-				}
-			*/
+
 			const message = rows[0].message;
-			for (const r of rows) {
-				console.log(r);
-			}
+			const zookeeperEmails = rows.map((r) => r.email);
 
-			for (let i = 0; i < 1; i++) {
-				const emailParams = new EmailParams()
-					.setFrom(sentFrom)
-					.setTo(recipients)
-					.setReplyTo(sentFrom)
-					.setSubject("Restock Animal Food")
-					.setHtml(createEmailHTML("Your Client", "Brandon", message))
-					.setText("Lettuce is out of stock. Please restock.");
+			const bulkEmails = rows
+				.filter((r) => !r.email.endsWith("@zoo.com"))
+				.map((r) => {
+					if (!r.email) {
+						return;
+					}
 
-				mailerSend.email
-					.send(emailParams)
-					.then((response) => {
-						console.log("Email sent successfully:", response);
-					})
-					.catch((error) => {
-						console.error("Error sending email:", error);
-					});
-			}
+					const emailParams = new EmailParams()
+						.setFrom(sentFrom)
+						.setTo([new Recipient(r.email)])
+						.setSubject("Animal Food Restock Notification")
+						.setHtml(
+							createEmailHTML(
+								"Zookeeper",
+								`${r.first_name} ${r.last_name}`,
+								message
+							)
+						)
+						.setText(message);
+
+					return emailParams;
+				});
+
+			mailerSend.email
+				.sendBulk(bulkEmails)
+				.then((response) => {
+					console.log("Email sent successfully:", response);
+				})
+				.catch(console.error);
+
+			const emailStrForSQLDelete = zookeeperEmails
+				.map((email) => `'${email}'`)
+				.join(", ");
 
 			conn
 				.promise()
-				.query("SELECT `email` FROM `animal_food_restock_email_queue`")
+				.query(
+					`DELETE FROM animal_food_restock_email_queue WHERE email IN (${emailStrForSQLDelete})`
+				)
 				.then(([rows, fields]) => {
-					console.log(rows);
+					console.log("Cleared email queue.");
 				})
 				.catch(console.log);
 		})
 		.catch(console.log);
-
-	res.writeHead(200, { "Content-Type": "application/json" });
-	res.end(JSON.stringify({ message: "Test Trigger" }));
 };
 
 module.exports = {

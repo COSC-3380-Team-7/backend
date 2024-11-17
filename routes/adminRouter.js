@@ -17,6 +17,7 @@ const visitorController = require("../controllers/visitorController");
 const authController = require("../controllers/authController");
 const triggerController = require("../controllers/triggerController");
 const animalFoodCostAnalysisController = require("../controllers/animalFoodCostAnalysisController");
+const animalHealthPerformanceController = require("../controllers/animalHealthPerformanceController");
 
 function router(req, res) {
 	const url = req.url;
@@ -291,15 +292,7 @@ function router(req, res) {
 	} else if (url.startsWith("/admin/vet_report") && method === "POST") {
 		vetReportsController.createVetReport(req, res);
 	} else if (url.startsWith("/admin/vet_report") && method === "PUT") {
-		const parts = parsedUrl.pathname.split("/");
-
-		if (parts.length >= 4) {
-			const vet_report_id = parts[3].slice(1); // Extract vet_report_id from the URL
-			vetReportsController.updateVetReport(req, res, vet_report_id);
-		} else {
-			res.writeHead(400, { "Content-Type": "application/json" });
-			res.end(JSON.stringify({ error: "Invalid URL missing vet_report_id." }));
-		}
+		vetReportsController.updateVetReport(req, res);
 	} else if (url.startsWith("/admin/department_employee") && method === "GET") {
 		const parts = parsedUrl.pathname.split("/");
 
@@ -522,13 +515,15 @@ function router(req, res) {
 		const query = parsedUrl.query;
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
+		const animal_name = query["animal_name"];
 
-		if (!start_date || !end_date) {
+		if (!start_date || !end_date || !animal_name) {
 			animalFoodCostAnalysisController.getRawCostData(req, res);
 		} else {
 			animalFoodCostAnalysisController.getRawCostDataByDate(
 				req,
 				res,
+				animal_name,
 				start_date,
 				end_date
 			);
@@ -540,13 +535,32 @@ function router(req, res) {
 		const query = parsedUrl.query;
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
+		const animal_name = query["animal_name"];
 
-		if (!start_date || !end_date) {
+		if (!start_date || !end_date || !animal_name) {
 			animalFoodCostAnalysisController.getCostAnalysis(req, res);
 		} else {
 			animalFoodCostAnalysisController.getCostAnalysisByDate(
 				req,
 				res,
+				animal_name,
+				start_date,
+				end_date
+			);
+		}
+	} else if (url.startsWith("/admin/health_perfomance") && method === "GET") {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+		const animal_name = query["animal_name"];
+
+		if (!start_date || !end_date || !animal_name) {
+			animalHealthPerformanceController.getAnimalHealthPerformance(req, res);
+		} else {
+			animalHealthPerformanceController.getAnimalHealthPerformanceByDate(
+				req,
+				res,
+				animal_name,
 				start_date,
 				end_date
 			);
