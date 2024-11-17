@@ -16,7 +16,7 @@ const departmentManagerController = require("../controllers/departmentManagersCo
 const visitorController = require("../controllers/visitorController");
 const authController = require("../controllers/authController");
 const triggerController = require("../controllers/triggerController");
-const animalfoodController = require("../controllers/animalfoodController");
+const animalFoodCostAnalysisController = require("../controllers/animalFoodCostAnalysisController");
 
 function router(req, res) {
 	const url = req.url;
@@ -515,6 +515,42 @@ function router(req, res) {
 			);
 		}
 		habitatController.getHabitatsByName(req, res, name);
+	} else if (
+		url.startsWith("/admin/raw_cost_analysis_animal_food") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+
+		if (!start_date || !end_date) {
+			animalFoodCostAnalysisController.getRawCostData(req, res);
+		} else {
+			animalFoodCostAnalysisController.getRawCostDataByDate(
+				req,
+				res,
+				start_date,
+				end_date
+			);
+		}
+	} else if (
+		url.startsWith("/admin/cost_analysis_animal_food") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+
+		if (!start_date || !end_date) {
+			animalFoodCostAnalysisController.getCostAnalysis(req, res);
+		} else {
+			animalFoodCostAnalysisController.getCostAnalysisByDate(
+				req,
+				res,
+				start_date,
+				end_date
+			);
+		}
 	} else if (url.startsWith("/admin/trigger") && method === "GET") {
 		triggerController.testTrigger(req, res);
 	} else {

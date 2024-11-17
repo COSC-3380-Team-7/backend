@@ -161,12 +161,17 @@ const purchaseAnimalFood = (req, res) => {
 	});
 
 	req.on("end", () => {
-		const { vendor_name, purchased_price, quantity, animal_food_id } =
-			JSON.parse(body);
+		const {
+			vendor_name,
+			purchased_price,
+			quantity,
+			date_purchased,
+			animal_food_id,
+		} = JSON.parse(body);
 
 		dbConnection.query(
-			"INSERT INTO animalfoodpurchases (vendor_name, purchased_price, quantity, animal_food_id) VALUES (?, ?, ?, ?)",
-			[vendor_name, purchased_price, quantity, animal_food_id],
+			"INSERT INTO animalfoodpurchases (vendor_name, purchased_price, quantity, date_purchased, animal_food_id) VALUES (?, ?, ?, ?, ?)",
+			[vendor_name, purchased_price, quantity, date_purchased, animal_food_id],
 			(err) => {
 				if (err) {
 					console.log(err);
@@ -217,13 +222,15 @@ const feedAnimal = (req, res) => {
 	});
 
 	req.on("end", () => {
-		const { animal_id, animal_food_id, quantity } = JSON.parse(body);
+		const { animal_id, animal_food_id, quantity, feeding_date } =
+			JSON.parse(body);
 
 		dbConnection.query(
 			"SELECT stock, food_name FROM animalfood WHERE animal_food_id = ?",
 			[animal_food_id],
 			(err, result) => {
 				if (err) {
+					console.log(err);
 					res.writeHead(500, { "Content-Type": "application/json" });
 					res.end(JSON.stringify({ error: "Internal Server Error" }));
 					return;
@@ -250,16 +257,18 @@ const feedAnimal = (req, res) => {
 					[newStock, animal_food_id],
 					(err) => {
 						if (err) {
+							console.log(err);
 							res.writeHead(500, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ error: "Internal Server Error" }));
 							return;
 						}
 
 						dbConnection.query(
-							"INSERT INTO animalfoodeaten (animal_id, animal_food_id, quantity) VALUES (?, ?, ?)",
-							[animal_id, animal_food_id, quantity],
+							"INSERT INTO animalfoodeaten (animal_id, animal_food_id, quantity, feeding_date) VALUES (?, ?, ?, ?)",
+							[animal_id, animal_food_id, quantity, feeding_date],
 							(err) => {
 								if (err) {
+									console.log(err);
 									res.writeHead(500, { "Content-Type": "application/json" });
 									res.end(JSON.stringify({ error: "Internal Server Error" }));
 									return;
