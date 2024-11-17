@@ -72,6 +72,32 @@ function router(req, res) {
   else if (url.startsWith("/public/signup") && method === "POST") {
     visitorController.createVisitor(req, res);
   }
+//   i made changes here -zoubida rezki
+//   else if (url.startsWith("/public/profile") && method === "PUT") {
+// 	const parts = parsedUrl.pathname.split("/");
+// 	console.log(parts)
+// 	if (parts.length >= 4) {
+// 	  const visitorId = parts[3].slice(1); // Extract visitorId from URL
+// 	  visitorController.updateVisitor(req, res, visitorId);
+// 	} else {
+// 	  res.writeHead(400, { "Content-Type": "application/json" });
+// 	  res.end(JSON.stringify({ error: "Invalid visitor ID" }));
+// 	}
+//   }
+else if (url.startsWith("/public/profile") && method === "PUT") {
+	const parts = parsedUrl.pathname.split("/");
+  
+	if (parts.length >= 4) {
+	  const visitorId = parts[3]; // Extract visitorId from URL
+	  visitorController.updateVisitor(req, res, visitorId);
+	} else {
+	  res.writeHead(400, { "Content-Type": "application/json" });
+	  res.end(JSON.stringify({ error_message: "Invalid visitor ID" }));
+	}
+  }
+  
+//   thats it 
+
 }
 
 module.exports = router;
