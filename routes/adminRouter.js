@@ -548,7 +548,50 @@ function router(req, res) {
 				end_date
 			);
 		}
-	} else if (url.startsWith("/admin/health_perfomance") && method === "GET") {
+	} else if (
+		url.startsWith("/admin/raw_health_performance_metrics") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+		const animal_name = query["animal_name"];
+
+		if (!start_date || !end_date || !animal_name) {
+			animalHealthPerformanceController.getRawVetReportMetrics(req, res);
+		} else {
+			animalHealthPerformanceController.getVetReportMetricsByNameDate(
+				req,
+				res,
+				animal_name,
+				start_date,
+				end_date
+			);
+		}
+	} else if (
+		url.startsWith("/admin/raw_health_food_eaten_metrics") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+		const animal_name = query["animal_name"];
+
+		if (!start_date || !end_date || !animal_name) {
+			animalHealthPerformanceController.getRawAnimalFoodEatenMetrics(req, res);
+		} else {
+			animalHealthPerformanceController.getAnimalFoodEatenMetricsByNameDate(
+				req,
+				res,
+				animal_name,
+				start_date,
+				end_date
+			);
+		}
+	} else if (
+		url.startsWith("/admin/health_performance_metrics") &&
+		method === "GET"
+	) {
 		const query = parsedUrl.query;
 		const start_date = query["start_date"];
 		const end_date = query["end_date"];
@@ -557,7 +600,7 @@ function router(req, res) {
 		if (!start_date || !end_date || !animal_name) {
 			animalHealthPerformanceController.getAnimalHealthPerformance(req, res);
 		} else {
-			animalHealthPerformanceController.getAnimalHealthPerformanceByDate(
+			animalHealthPerformanceController.getAnimalHealthPerformanceByNameDate(
 				req,
 				res,
 				animal_name,
