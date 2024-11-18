@@ -85,7 +85,7 @@ git init
 git remote add origin https://github.com/COSC-3380-Team-7/backend.git
 git pull origin main
 npm i
-(create .env file)
+(create .env file in root directory)
 npm run start
 ```
 
