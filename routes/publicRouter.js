@@ -6,6 +6,7 @@ const eventController = require("../controllers/eventController");
 //const profileController = require("../controllers/profileController");
 const visitorController = require("../controllers/visitorController");
 const ticketController = require('../controllers/ticketController');
+const complaintController = require("../controllers/complaintsController");
 
 function router(req, res) {
   const url = req.url;
@@ -138,6 +139,9 @@ else if (url.startsWith("/public/tickets") && method === "GET") {
 //   }
   
 //   thats it 
+if (url.startsWith("/public/complaints") && method === "POST") {
+	complaintController.createComplaint(req, res);
+  }
 
 }
 
