@@ -23,7 +23,7 @@ const restockNotificationStoredProcedure = () => {
 				return;
 			}
 
-			await new Promise((resolve) => setTimeout(resolve, 10000));
+			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			const message = rows[0].message;
 			const zookeeperEmails = rows.map((r) => r.email);
@@ -146,7 +146,7 @@ const sickAnimalNotificationStoredProcedure = () => {
 				return;
 			}
 
-			await new Promise((resolve) => setTimeout(resolve, 10000));
+			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			const message = rows[0].message;
 			const zookeeperEmails = rows.map((r) => r.email);
