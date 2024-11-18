@@ -135,7 +135,6 @@ const employeeLogin = (req, res) => {
 				}
 
 				const employee = result[0];
-				console.log(employee);
 
 				bcrypt.compare(password, employee.password, (err, same) => {
 					if (err) {

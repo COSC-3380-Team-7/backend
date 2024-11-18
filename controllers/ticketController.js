@@ -46,28 +46,27 @@ const { dbConnection } = require("../db.js");
 
 const getSingleTicket = (req, res, ticket_type_id) => {
 	dbConnection.query(
-	  "SELECT * FROM tickettype WHERE ticket_type_id = ?",
-	  [ticket_type_id],
-	  (err, result) => {
-		if (err) {
-		  console.error("Database Query Error:", err);
-		  res.writeHead(500, { "Content-Type": "application/json" });
-		  res.end(JSON.stringify({ error: "Internal Server Error" }));
-		  return;
+		"SELECT * FROM tickettype WHERE ticket_type_id = ?",
+		[ticket_type_id],
+		(err, result) => {
+			if (err) {
+				console.error("Database Query Error:", err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+
+			if (result.length === 0) {
+				res.writeHead(404, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Ticket type not found" }));
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result[0] }));
 		}
-  
-		if (result.length === 0) {
-		  res.writeHead(404, { "Content-Type": "application/json" });
-		  res.end(JSON.stringify({ error: "Ticket type not found" }));
-		  return;
-		}
-  
-		res.writeHead(200, { "Content-Type": "application/json" });
-		res.end(JSON.stringify({ data: result[0] }));
-	  }
 	);
-  };
-  
+};
 
 // const getAllTickets = (req, res) => {
 // 	dbConnection.query("SELECT * FROM tickets", (err, result) => {
@@ -92,19 +91,21 @@ const getSingleTicket = (req, res, ticket_type_id) => {
 // };
 
 const getAllTickets = (req, res) => {
-	dbConnection.query("SELECT * FROM tickettype ORDER BY price", (err, result) => {
-	  if (err) {
-		console.error("Database Query Error:", err);
-		res.writeHead(500, { "Content-Type": "application/json" });
-		res.end(JSON.stringify({ error: "Internal Server Error" }));
-		return;
-	  }
-  
-	  res.writeHead(200, { "Content-Type": "application/json" });
-	  res.end(JSON.stringify({ data: result }));
-	});
-  };
-  
+	dbConnection.query(
+		"SELECT * FROM tickettype ORDER BY price",
+		(err, result) => {
+			if (err) {
+				console.error("Database Query Error:", err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Internal Server Error" }));
+				return;
+			}
+
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(JSON.stringify({ data: result }));
+		}
+	);
+};
 
 const updateTicket = (req, res, ticket_id) => {
 	let body = "";
@@ -180,35 +181,50 @@ const updateTicket = (req, res, ticket_id) => {
 const createTicket = (req, res) => {
 	let body = "";
 	req.on("data", (chunk) => {
-	  body += chunk.toString();
+		body += chunk.toString();
 	});
-  
+
 	req.on("end", () => {
-	  const { visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id } = JSON.parse(body);
-  
-	  dbConnection.query(
-		"INSERT INTO ticketpurchases (visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-		[visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id],
-		(err, result) => {
-		  if (err) {
-			console.error("Database Query Error:", err);
-			res.writeHead(500, { "Content-Type": "application/json" });
-			res.end(JSON.stringify({ error: "Internal Server Error" }));
-			return;
-		  }
-  
-		  res.writeHead(201, { "Content-Type": "application/json" });
-		  res.end(
-			JSON.stringify({
-			  message: "Ticket purchase has been added successfully",
-			  purchase_id: result.insertId,
-			})
-		  );
-		}
-	  );
+		const {
+			visitor_id,
+			purchase_date,
+			purchase_price,
+			ticket_type_id,
+			scheduled_date,
+			quantity_purchased,
+			exhibit_id,
+		} = JSON.parse(body);
+
+		dbConnection.query(
+			"INSERT INTO ticketpurchases (visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			[
+				visitor_id,
+				purchase_date,
+				purchase_price,
+				ticket_type_id,
+				scheduled_date,
+				quantity_purchased,
+				exhibit_id,
+			],
+			(err, result) => {
+				if (err) {
+					console.error("Database Query Error:", err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(JSON.stringify({ error: "Internal Server Error" }));
+					return;
+				}
+
+				res.writeHead(201, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Ticket purchase has been added successfully",
+						purchase_id: result.insertId,
+					})
+				);
+			}
+		);
 	});
-  };
-  
+};
 
 const getAllTicketPricing = (req, res) => {
 	dbConnection.query(
@@ -372,61 +388,58 @@ const createTicketPricing = (req, res) => {
 
 const createTicketPurchase = (req, res) => {
 	let body = "";
-  
-	req.on("data", (chunk) => {
-	  body += chunk.toString();
-	});
-  
-	req.on("end", () => {
-	  const { visitor_id, purchase_date, scheduled_date, purchases } =
-		JSON.parse(body);
-  
-	  // Build the query for bulk insert
-	  const values = purchases.map((purchase) => [
-		visitor_id,
-		purchase_date,
-		purchase.purchase_price,
-		purchase.ticket_type_id,
-		scheduled_date,
-		purchase.quantity_purchased,
-		null, // Assume exhibit_id is null for now or replace with valid data
-	  ]);
-	  console.log(values)
-	  values.forEach(row => {
-		if (row[row.length - 1] === null) {
-		  row[row.length - 1] = 1000000;
-		}
-	  });
-	  
-	  console.log(values);
-  
-	  dbConnection.query(
-		
-		"INSERT INTO ticketpurchases (visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id) VALUES ?",
-		[values],
-		(err, result) => {
-		  if (err) {
-			console.error("Database Error:", err);
-			res.writeHead(500, { "Content-Type": "application/json" });
-			res.end(
-			  JSON.stringify({ error: "Failed to insert ticket purchases" })
-			);
-			return;
-		  }
-  
-		  res.writeHead(201, { "Content-Type": "application/json" });
-		  res.end(
-			JSON.stringify({
-			  message: "Ticket purchases successfully added",
-			  affectedRows: result.affectedRows,
-			})
-		  );
-		}
-	  );
-	});
-  };
-  
 
+	req.on("data", (chunk) => {
+		body += chunk.toString();
+	});
+
+	req.on("end", () => {
+		const { visitor_id, purchase_date, scheduled_date, purchases } =
+			JSON.parse(body);
+
+		// Build the query for bulk insert
+		const values = purchases.map((purchase) => [
+			visitor_id,
+			purchase_date,
+			purchase.purchase_price,
+			purchase.ticket_type_id,
+			scheduled_date,
+			purchase.quantity_purchased,
+			null, // Assume exhibit_id is null for now or replace with valid data
+		]);
+		console.log(values);
+		values.forEach((row) => {
+			if (row[row.length - 1] === null) {
+				row[row.length - 1] = 1000000;
+			}
+		});
+
+		console.log(values);
+
+		dbConnection.query(
+			"INSERT INTO ticketpurchases (visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id) VALUES ?",
+			[values],
+			(err, result) => {
+				if (err) {
+					console.error("Database Error:", err);
+					res.writeHead(500, { "Content-Type": "application/json" });
+					res.end(
+						JSON.stringify({ error: "Failed to insert ticket purchases" })
+					);
+					return;
+				}
+
+				res.writeHead(201, { "Content-Type": "application/json" });
+				res.end(
+					JSON.stringify({
+						message: "Ticket purchases successfully added",
+						affectedRows: result.affectedRows,
+					})
+				);
+			}
+		);
+	});
+};
 
 module.exports = {
 	getSingleTicket,

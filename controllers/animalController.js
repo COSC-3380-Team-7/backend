@@ -391,7 +391,16 @@ const updateAvailability = (req, res) => {
 
 const getAllAnimalsPresent = (req, res) => {
 	dbConnection.query(
-		"SELECT * FROM animals WHERE availability_status = 'Present' ORDER BY name",
+		`SELECT *
+		FROM animals
+		WHERE availability_status = 'Present'
+		AND animal_id IN (
+			SELECT MIN(animal_id)
+			FROM animals
+			WHERE availability_status = 'Present'
+			GROUP BY name
+		)
+		ORDER BY name`,
 		(err, result) => {
 			if (err) {
 				console.log(err);
