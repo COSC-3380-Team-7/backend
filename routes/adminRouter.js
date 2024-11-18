@@ -18,6 +18,7 @@ const authController = require("../controllers/authController");
 const triggerController = require("../controllers/triggerController");
 const animalFoodCostAnalysisController = require("../controllers/animalFoodCostAnalysisController");
 const animalHealthPerformanceController = require("../controllers/animalHealthPerformanceController");
+const exhibitPerformanceController = require("../controllers/exhibitPerformanceController");
 
 function router(req, res) {
 	const url = req.url;
@@ -603,6 +604,60 @@ function router(req, res) {
 				res,
 				animal_name,
 				nickname,
+				start_date,
+				end_date
+			);
+		}
+	} else if (url.startsWith("/admin/pm_exhibit") && method === "GET") {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+		const exhibit_name = query["exhibit_name"];
+
+		if (!start_date || !end_date || !exhibit_name) {
+			exhibitPerformanceController.getExhibitsPerformance(req, res);
+		} else {
+			exhibitPerformanceController.getExhibitsPerformanceByNameDate(
+				req,
+				res,
+				exhibit_name,
+				start_date,
+				end_date
+			);
+		}
+	} else if (url.startsWith("/admin/pm_tickets") && method === "GET") {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+		const exhibit_name = query["exhibit_name"];
+
+		if (!start_date || !end_date || !exhibit_name) {
+			exhibitPerformanceController.getTicketsSoldPerExhibit(req, res);
+		} else {
+			exhibitPerformanceController.getTicketsSoldPerExhibitNameDate(
+				req,
+				res,
+				exhibit_name,
+				start_date,
+				end_date
+			);
+		}
+	} else if (
+		url.startsWith("/admin/performance_complaints") &&
+		method === "GET"
+	) {
+		const query = parsedUrl.query;
+		const start_date = query["start_date"];
+		const end_date = query["end_date"];
+		const exhibit_name = query["exhibit_name"];
+
+		if (!start_date || !end_date || !exhibit_name) {
+			exhibitPerformanceController.getComplaintsPerExhibit(req, res);
+		} else {
+			exhibitPerformanceController.getComplaintsPerExhibitNameDate(
+				req,
+				res,
+				exhibit_name,
 				start_date,
 				end_date
 			);
