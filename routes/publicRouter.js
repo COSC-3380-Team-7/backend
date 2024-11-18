@@ -131,12 +131,27 @@ else if (url.startsWith("/public/tickets") && method === "GET") {
 	  ticketController.getAllTickets(req, res);
 	}
   }
-  if (url.startsWith("/public/ticketpurchases") && method === "POST") {
-	ticketController.createTicketPurchase(req, res);
-  }
+//   if (url.startsWith("/public/ticketpurchases") && method === "POST") {
+// 	ticketController.createTicketPurchase(req, res);
+//   }
 //   else if (url.startsWith("/public/ticketpurchases") && method === "POST") {
 // 	ticketController.createTicket(req, res);
 //   }
+else if (url.startsWith("/public/ticketpurchases") && method === "POST") {
+    ticketController.createTicketPurchase(req, res);
+}
+
+
+else if (url.startsWith("/public/ticketpurchases") && method === "GET") {
+    const parts = parsedUrl.pathname.split("/");
+    if (parts.length >= 4) {
+        const visitorId = parts[3]; // Extract visitor_id from URL
+        ticketController.getTicketsByVisitor(req, res, visitorId);
+    } else {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "visitor_id is required" }));
+    }
+}
   
 //   thats it 
 if (url.startsWith("/public/complaints") && method === "POST") {

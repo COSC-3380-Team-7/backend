@@ -443,8 +443,27 @@ const createTicketPurchase = (req, res) => {
 	});
 };
 
+const getTicketsByVisitor = (req, res, visitor_id) => {
+    dbConnection.query(
+        "SELECT TP.*, TT.category, TT.price, E.name AS exhibit_name FROM ticketpurchases TP JOIN tickettype TT ON TP.ticket_type_id = TT.ticket_type_id LEFT JOIN exhibits E ON TP.exhibit_id = E.exhibit_id WHERE TP.visitor_id = ? ORDER BY TP.purchase_date DESC",
+        [visitor_id],
+        (err, result) => {
+            if (err) {
+                console.error("Database Error:", err);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Internal Server Error" }));
+                return;
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ data: result }));
+        }
+    );
+};
+
 module.exports = {
 	getSingleTicket,
+	getTicketsByVisitor,
 	createTicketPurchase,
 	getAllTickets,
 	updateTicket,
