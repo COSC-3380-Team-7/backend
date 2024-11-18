@@ -394,7 +394,8 @@ const createTicketPurchase = (req, res) => {
 	});
 
 	req.on("end", () => {
-		const { visitor_id, purchase_date, scheduled_date, purchases } =
+		console.log(body)
+		const { visitor_id, purchase_date, scheduled_date, purchases,exhibit_id } =
 			JSON.parse(body);
 
 		// Build the query for bulk insert
@@ -405,16 +406,17 @@ const createTicketPurchase = (req, res) => {
 			purchase.ticket_type_id,
 			scheduled_date,
 			purchase.quantity_purchased,
-			null, // Assume exhibit_id is null for now or replace with valid data
+			exhibit_id,
+			// null, // Assume exhibit_id is null for now or replace with valid data
 		]);
 		console.log(values);
-		values.forEach((row) => {
-			if (row[row.length - 1] === null) {
-				row[row.length - 1] = 1000000;
-			}
-		});
+		// values.forEach((row) => {
+		// 	if (row[row.length - 1] === null) {
+		// 		row[row.length - 1] = 1000000;
+		// 	}
+		// });
 
-		console.log(values);
+		// console.log(values);
 
 		dbConnection.query(
 			"INSERT INTO ticketpurchases (visitor_id, purchase_date, purchase_price, ticket_type_id, scheduled_date, quantity_purchased, exhibit_id) VALUES ?",
