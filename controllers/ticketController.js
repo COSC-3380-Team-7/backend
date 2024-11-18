@@ -245,27 +245,36 @@ const getAllTicketPricing = (req, res) => {
 	);
 };
 
-const updateTicketPricing = (req, res, ticket_type_id) => {
+const updateTicketPricing = (req, res) => {
 	let body = "";
 	req.on("data", (chunk) => {
 		body += chunk.toString();
 	});
 
 	req.on("end", () => {
-		const { category, price } = JSON.parse(body);
+		const { category, price, ticket_type_id } = JSON.parse(body);
 
 		dbConnection.query(
 			"UPDATE tickettype SET category = ?, price = ? WHERE ticket_type_id = ?",
 			[category, price, ticket_type_id],
-			(err, result) => {
+			(err) => {
 				if (err) {
 					console.log(err);
-					res.writeHead(500, { "Content-Type": "application/json" });
-					res.end(
-						JSON.stringify({
-							error: "Internal Server Error",
-						})
-					);
+					if (err.code === "ER_DUP_ENTRY") {
+						res.writeHead(400, { "Content-Type": "application/json" });
+						res.end(
+							JSON.stringify({
+								error_message: "Category already exists",
+							})
+						);
+					} else {
+						res.writeHead(500, { "Content-Type": "application/json" });
+						res.end(
+							JSON.stringify({
+								error: "Internal Server Error",
+							})
+						);
+					}
 					return;
 				}
 
@@ -331,12 +340,21 @@ const createTicketPricing = (req, res) => {
 			(err, result) => {
 				if (err) {
 					console.log(err);
-					res.writeHead(500, { "Content-Type": "application/json" });
-					res.end(
-						JSON.stringify({
-							error: "Internal Server Error",
-						})
-					);
+					if (err.code === "ER_DUP_ENTRY") {
+						res.writeHead(400, { "Content-Type": "application/json" });
+						res.end(
+							JSON.stringify({
+								error_message: "Category already exists",
+							})
+						);
+					} else {
+						res.writeHead(500, { "Content-Type": "application/json" });
+						res.end(
+							JSON.stringify({
+								error: "Internal Server Error",
+							})
+						);
+					}
 					return;
 				}
 
