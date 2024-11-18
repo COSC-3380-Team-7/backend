@@ -5,6 +5,7 @@ const habitatController = require("../controllers/habitatController");
 const eventController = require("../controllers/eventController");
 //const profileController = require("../controllers/profileController");
 const visitorController = require("../controllers/visitorController");
+const ticketController = require('../controllers/ticketController');
 
 function router(req, res) {
   const url = req.url;
@@ -95,6 +96,46 @@ else if (url.startsWith("/public/profile") && method === "PUT") {
 	  res.end(JSON.stringify({ error_message: "Invalid visitor ID" }));
 	}
   }
+
+//   else if (url.startsWith("/public/tickets") && method === "GET") {
+//     const parts = parsedUrl.pathname.split("/");
+
+//     // If ticket_type_id is provided, fetch single ticket
+//     if (parts.length >= 4) {
+//       const ticket_type_id = parts[3]; // Extract ticket_type_id from URL
+//       ticketController.getSingleTicket(req, res, ticket_type_id);
+//     } else {
+//       // Otherwise, fetch all tickets
+//       ticketController.getAllTickets(req, res);
+//     }
+//   }
+
+//   else if (url.startsWith("/public/tickettype") && method === "GET") {
+// 	const parts = parsedUrl.pathname.split("/");
+// 	if (parts.length >= 4) {
+// 	  const ticket_type_id = parts[3];
+// 	  ticketController.getSingleTicketPrice(req, res, ticket_type_id);
+// 	} else {
+// 	  ticketController.getAllTicketPricing(req, res);
+// 	}
+//   }
+
+else if (url.startsWith("/public/tickets") && method === "GET") {
+	const parts = parsedUrl.pathname.split("/");
+  
+	if (parts.length >= 4) {
+	  const ticket_type_id = parts[3];
+	  ticketController.getSingleTicket(req, res, ticket_type_id);
+	} else {
+	  ticketController.getAllTickets(req, res);
+	}
+  }
+  if (url.startsWith("/public/ticketpurchases") && method === "POST") {
+	ticketController.createTicketPurchase(req, res);
+  }
+//   else if (url.startsWith("/public/ticketpurchases") && method === "POST") {
+// 	ticketController.createTicket(req, res);
+//   }
   
 //   thats it 
 
