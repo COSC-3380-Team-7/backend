@@ -9,7 +9,7 @@ const mailerSend = new MailerSend({
 const restockNotificationStoredProcedure = () => {
 	const sentFrom = new Sender(
 		"MS_hDQ5DM@trial-z3m5jgrw0exldpyo.mlsender.net",
-		"Baker Zoo"
+		"Houston Zoo"
 	);
 
 	conn
@@ -124,7 +124,7 @@ const createRestockEmailHTML = (first_name, last_name, message) => {
                     <p>${message}</p>
                 </div>
                 <div class="footer">
-                    <p>&copy; 2024 Baker Zoo Management System</p>
+                    <p>&copy; 2024 Houston Zoo Management System</p>
                 </div>
             </div>
         </body>
@@ -133,7 +133,7 @@ const createRestockEmailHTML = (first_name, last_name, message) => {
 };
 
 const sickAnimalNotificationStoredProcedure = () => {
-	const sentFrom = new Sender(process.env.MAILERSEND_FROM_EMAIL, "Baker Zoo");
+	const sentFrom = new Sender(process.env.MAILERSEND_FROM_EMAIL, "Houston Zoo");
 
 	conn
 		.promise()
@@ -247,7 +247,7 @@ const createSickAnimalEmailHTML = (first_name, last_name, message) => {
                     <p>${message}</p>
                 </div>
                 <div class="footer">
-                    <p>&copy; 2024 Baker Zoo Management System</p>
+                    <p>&copy; 2024 Houston Zoo Management System</p>
                 </div>
             </div>
         </body>
