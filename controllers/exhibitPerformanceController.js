@@ -1,40 +1,39 @@
 const { dbConnection } = require("../db.js");
 
 const getExhibitsPerformance = (req, res) => {
-	/*
-        SELECT 
-        e.name AS exhibit_name,
-        COALESCE(SUM(tp.quantity_purchased), 0) AS tickets_sold,
-        COALESCE(SUM(tp.purchase_price * tp.quantity_purchased), 0) AS total_profit,
-        COALESCE(COUNT(c.id), 0) AS number_of_complaints
-        FROM 
-            exhibits e
-        LEFT JOIN 
-            ticketpurchases tp ON e.exhibit_id = tp.exhibit_id
-        LEFT JOIN 
-            complaints c ON e.exhibit_id = c.exhibit_id
-        GROUP BY 
-            e.exhibit_id, e.name
-        ORDER BY 
-            total_profit DESC;
-
-    */
 	dbConnection.query(
 		`SELECT 
-            e.name AS exhibit_name,
-            COALESCE(SUM(tp.quantity_purchased), 0) AS tickets_sold,
-            COALESCE(SUM(tp.purchase_price * tp.quantity_purchased), 0) AS total_profit,
-            COALESCE(COUNT(c.id), 0) AS number_of_complaints
-        FROM 
-            exhibits e
-        LEFT JOIN 
-            ticketpurchases tp ON e.exhibit_id = tp.exhibit_id
-        LEFT JOIN 
-            complaints c ON e.exhibit_id = c.exhibit_id
-        GROUP BY 
-            e.exhibit_id, e.name
-        ORDER BY 
-            total_profit DESC;`,
+			e.name AS exhibit_name,
+			COALESCE(tp_data.tickets_sold, 0) AS tickets_sold,
+			COALESCE(tp_data.total_profit, 0) AS total_profit,
+			COALESCE(c_data.number_of_complaints, 0) AS number_of_complaints
+		FROM
+			exhibits e
+		LEFT JOIN (
+			SELECT 
+				exhibit_id,
+				SUM(quantity_purchased) AS tickets_sold,
+				SUM(purchase_price * quantity_purchased) AS total_profit
+			FROM 
+				ticketpurchases
+			WHERE 
+				purchase_date BETWEEN '2024-11-01' AND '2024-11-30'
+			GROUP BY 
+				exhibit_id
+		) tp_data ON e.exhibit_id = tp_data.exhibit_id
+		LEFT JOIN (
+			SELECT 
+				exhibit_id,
+				COUNT(DISTINCT id) AS number_of_complaints
+			FROM 
+				complaints
+			WHERE 
+				date_created BETWEEN '2024-11-01' AND '2024-11-30'
+			GROUP BY 
+				exhibit_id
+		) c_data ON e.exhibit_id = c_data.exhibit_id
+		ORDER BY 
+			total_profit DESC;`,
 		(err, result) => {
 			if (err) {
 				console.log(err);
@@ -62,6 +61,7 @@ const getTicketsSoldPerExhibit = (req, res) => {
 		`SELECT 
             e.name AS ExhibitName,
             tt.category AS TicketCategory,
+			tt.price AS TicketPrice,
             COALESCE(SUM(tp.purchase_price * tp.quantity_purchased), 0) AS TotalProfit,
             COALESCE(SUM(tp.quantity_purchased), 0) AS TicketsSoldByType
         FROM 
@@ -106,6 +106,7 @@ const getTicketsSoldPerExhibitNameDate = (
 	dbConnection.query(
 		`SELECT 
             e.name AS ExhibitName,
+			tt.price AS TicketPrice,
             tt.category AS TicketCategory,
             COALESCE(SUM(tp.purchase_price * tp.quantity_purchased), 0) AS TotalProfit,
             COALESCE(SUM(tp.quantity_purchased), 0) AS TicketsSoldByType
@@ -261,24 +262,47 @@ const getExhibitsPerformanceByNameDate = (
 ) => {
 	dbConnection.query(
 		`SELECT 
-            e.name AS exhibit_name,
-            COALESCE(SUM(tp.quantity_purchased), 0) AS tickets_sold,
-            COALESCE(SUM(tp.purchase_price * tp.quantity_purchased), 0) AS total_profit,
-            COALESCE(COUNT(c.id), 0) AS number_of_complaints
-        FROM 
-            exhibits e
-        LEFT JOIN 
-            ticketpurchases tp ON e.exhibit_id = tp.exhibit_id
-        LEFT JOIN 
-            complaints c ON e.exhibit_id = c.exhibit_id
-        WHERE 
-            e.name = ? AND tp.purchase_date BETWEEN ? AND ?
-            AND c.date_created BETWEEN ? AND ?
-        GROUP BY 
-            e.exhibit_id, e.name
-        ORDER BY 
-            total_profit DESC;`,
-		[exhibitName, startDate, endDate, startDate, endDate],
+			e.name AS exhibit_name,
+			COALESCE(tp_data.tickets_sold, 0) AS tickets_sold,
+			COALESCE(tp_data.total_profit, 0) AS total_profit,
+			COALESCE(c_data.number_of_complaints, 0) AS number_of_complaints
+		FROM
+			exhibits e
+		LEFT JOIN (
+			SELECT 
+				exhibit_id,
+				SUM(quantity_purchased) AS tickets_sold,
+				SUM(purchase_price * quantity_purchased) AS total_profit
+			FROM 
+				ticketpurchases
+			WHERE 
+				exhibit_id = (SELECT exhibit_id FROM exhibits WHERE name = ?) AND purchase_date BETWEEN ? AND ?
+			GROUP BY 
+				exhibit_id
+		) tp_data ON e.exhibit_id = tp_data.exhibit_id
+		LEFT JOIN (
+			SELECT 
+				exhibit_id,
+				COUNT(DISTINCT id) AS number_of_complaints
+			FROM 
+				complaints
+			WHERE 
+				exhibit_id = (SELECT exhibit_id FROM exhibits WHERE name = ?) AND date_created BETWEEN ? AND ?
+			GROUP BY 
+				exhibit_id
+		) c_data ON e.exhibit_id = c_data.exhibit_id
+		 WHERE e.name = ?
+		ORDER BY 
+			total_profit DESC;`,
+		[
+			exhibitName,
+			startDate,
+			endDate,
+			exhibitName,
+			startDate,
+			endDate,
+			exhibitName,
+		],
 		(err, result) => {
 			if (err) {
 				console.log(err);
