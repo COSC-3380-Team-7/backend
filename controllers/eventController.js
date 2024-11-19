@@ -99,7 +99,7 @@ const createEvent = (req, res) => {
 				end_time,
 				event_category_id,
 				description,
-				member_exclusive,
+				false,
 			],
 			(err, result) => {
 				if (err) {
@@ -160,7 +160,7 @@ const updateEvent = (req, res, event_id) => {
 				end_time,
 				event_category_id,
 				description,
-				member_exclusive,
+				false,
 				event_id,
 			],
 			(err, result) => {
