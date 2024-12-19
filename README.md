@@ -97,7 +97,14 @@ npm run start
 > Ensure that `.env` and is properly implemented so it could function.
 
 ```env
-
+PORT = 8081
+CLOUDINARY_CLOUD_NAME =
+CLOUDINARY_API_KEY =
+CLOUDINARY_API_SECRET =
+DB_PASSWORD =
+DB_DATABASE =
+MAILERSEND_API_TOKEN =
+MAILERSEND_FROM_EMAIL =
 ```
 
 > [!NOTE]
