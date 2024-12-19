@@ -2,15 +2,11 @@ const { conn } = require("../db.js");
 const { MailerSend, EmailParams, Sender, Recipient } = require("mailersend");
 
 const mailerSend = new MailerSend({
-	apiKey:
-		"mlsn.0bb697676a9d0ac9913245a4d12191e9a87efbe998a4553fcd1cd3808681d413",
+	apiKey: "",
 });
 
 const restockNotificationStoredProcedure = () => {
-	const sentFrom = new Sender(
-		"MS_hDQ5DM@trial-z3m5jgrw0exldpyo.mlsender.net",
-		"Houston Zoo"
-	);
+	const sentFrom = new Sender("", "Houston Zoo");
 
 	conn
 		.promise()

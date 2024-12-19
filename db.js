@@ -6,8 +6,8 @@ const serverCa = [
 const mysql2 = require("mysql2");
 
 const conn = mysql2.createConnection({
-	host: "zoo-team7.mysql.database.azure.com",
-	user: "dbadmin",
+	host: "",
+	user: "",
 	password: process.env.DB_PASSWORD,
 	database: process.env.DB_DATABASE,
 	port: 3306,
